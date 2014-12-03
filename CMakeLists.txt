@@ -42,20 +42,28 @@ qt4_wrap_cpp(GUI_MOC_FILES
   include/dual_manipulation_gui.h
 )
 
-#set(WIDGETS_MOC_FILES
-#  ${GUI_MOC_FILES}
-#)
+qt4_wrap_cpp(WIDGETS_MOC_FILES
+  include/widgets/render_widget.h
+  include/widgets/camera_widget.h
+  include/widgets/state_machine_widget.h
+  include/widgets/state_widget.h
+  include/widgets/control_widget.h
+)
 
-#set(WIDGET_SOURCE_FILES
-#
-#)
+set(WIDGET_SOURCE_FILES
+  src/widgets/render_widget.cpp
+  src/widgets/camera_widget.cpp
+  src/widgets/state_machine_widget.cpp
+  src/widgets/state_widget.cpp
+  src/widgets/control_widget.cpp
+)
 
 set(SOURCE_FILES
   src/dual_manipulation_gui.cpp
   src/main.cpp
   ${GUI_MOC_FILES}
-  #${WIDGETS_MOC_FILES}
-  #${WIDGET_SOURCE_FILES}
+  ${WIDGETS_MOC_FILES}
+  ${WIDGET_SOURCE_FILES}
 )
 
 add_executable(dual_manipulation_gui ${SOURCE_FILES} ${QT_FORMS_HPP})
