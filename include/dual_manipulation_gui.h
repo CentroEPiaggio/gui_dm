@@ -2,8 +2,7 @@
 #define DUAL_MANIPULATION_GUI_H
 
 #include <QWidget>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
+#include <QSplitter>
 #include <cstdlib>
 #include <widgets/camera_widget.h>
 #include <widgets/render_widget.h>
@@ -26,13 +25,13 @@ private:
   state_widget state;
   control_widget control;
 
-  QVBoxLayout main_layout;
+  QSplitter main_layout;
   
-  QHBoxLayout visualization_layout;
+  QSplitter visualization_layout;
   
-  QHBoxLayout control_layout;
+  QSplitter control_layout;
   
-  QHBoxLayout state_layout;
+  QSplitter state_layout;
 };
 
 #endif // DUAL_MANIPULATION_GUI_H
