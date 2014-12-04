@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <rviz/visualization_manager.h>
 #include <rviz/render_panel.h>
+#include <rviz/display.h>
 
 class render_3d_widget: public QWidget
 {
@@ -21,6 +22,9 @@ private:
   rviz::RenderPanel render_panel;
   rviz::VisualizationManager visualization_manager;
   
+  rviz::Display* robot_display;
+  rviz::Display* object_display;
+  rviz::Display* grasp_display;
 };
 
 #endif // RENDER_3D_WIDGET_H
