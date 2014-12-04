@@ -5,7 +5,7 @@
 #include <QSplitter>
 #include <cstdlib>
 #include <widgets/camera_widget.h>
-#include <widgets/render_widget.h>
+#include <widgets/render_3d_widget.h>
 #include <widgets/state_machine_widget.h>
 #include <widgets/state_widget.h>
 #include <widgets/control_widget.h>
@@ -19,7 +19,7 @@ public:
 
 private:
   
-  render_widget render;
+  render_3d_widget render;
   camera_widget camera;
   state_machine_widget state_machine;
   state_widget state;
