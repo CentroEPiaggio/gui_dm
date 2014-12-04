@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QGridLayout>
+#include <QTreeWidget>
 #include <cstdlib>
 
 class state_widget: public QWidget
@@ -15,6 +16,8 @@ public:
 private:
 
   QGridLayout main_layout;
+  
+  QTreeWidget status_table;
 
 };
 

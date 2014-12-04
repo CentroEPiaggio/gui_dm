@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QGridLayout>
+#include <QPushButton>
 #include <cstdlib>
 
 class control_widget: public QWidget
@@ -16,6 +17,7 @@ private:
 
   QGridLayout main_layout;
 
+  QPushButton example_button;
 };
 
 #endif // CONTROL_WIDGET_H
