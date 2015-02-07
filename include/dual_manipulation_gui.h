@@ -9,6 +9,7 @@
 #include <widgets/state_machine_widget.h>
 #include <widgets/state_widget.h>
 #include <widgets/control_widget.h>
+#include <widgets/target_widget.h>
 
 class dual_manipulation_gui: public QWidget
 {
@@ -19,11 +20,12 @@ public:
 
 private:
   
-  render_3d_widget render;
-  camera_widget camera;
-  state_machine_widget state_machine;
-  state_widget state;
+//   render_3d_widget render;
+//   camera_widget camera;
+//   state_machine_widget state_machine;
+//   state_widget state;
   control_widget control;
+  target_widget target;
 
   QSplitter main_layout;
   

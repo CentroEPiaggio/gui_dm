@@ -5,6 +5,10 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <cstdlib>
+#include <QSignalMapper>
+#include <map>
+#include "ros/ros.h"
+#include "dual_manipulation_shared/state_manager_service.h"
 
 class control_widget: public QWidget
 {
@@ -13,11 +17,18 @@ public:
   control_widget();
   ~control_widget();
 
-private:
+private Q_SLOTS:
+  void on_command_button_clicked(const int& id);
 
+private:
+  QSignalMapper signalMapper;
   QGridLayout main_layout;
 
-  QPushButton example_button;
+  std::map<int,QPushButton*> map_button;
+
+  ros::NodeHandle n;
+  ros::ServiceClient client;
+  dual_manipulation_shared::state_manager_service srv;
 };
 
 #endif // CONTROL_WIDGET_H

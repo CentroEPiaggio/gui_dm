@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     if( !ros::isInitialized() )
     {
-      ros::init( argc, argv, "pilot_interface", ros::init_options::AnonymousName );
+      ros::init( argc, argv, "Dual_Manipulation_GUI", ros::init_options::AnonymousName );
     }
     
     QApplication a(argc, argv);
