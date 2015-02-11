@@ -43,6 +43,7 @@ private:
   ros::Subscriber sub;
   bool target_ready=false;
   void clicked_point(const geometry_msgs::PointStampedPtr& point);
+  void update_coords();
 };
 
 #endif // TARGET_WIDGET_H

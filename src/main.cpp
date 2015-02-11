@@ -2,6 +2,16 @@
 #include <QApplication>
 #include <ros/ros.h>
 #include "ros/package.h"
+#include <thread>
+
+void thread_body()
+{
+    while(1)
+    {
+	ros::spinOnce(); 
+	usleep(200000);
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -18,6 +28,8 @@ int main(int argc, char *argv[])
     dmg.setWindowTitle("Dual Manipulation GUI");
     dmg.setWindowIcon(QIcon(path_to_package + "/vito.png"));
     dmg.show();
+    
+    std::thread th(&thread_body);
 
     return a.exec();
 }
