@@ -9,7 +9,7 @@ target_widget::target_widget()
     int col = 0;
     
     gui_target_service = n.advertiseService("gui_target_service", &target_widget::gui_target_service_callback, this);
-    sub = n.subscribe("/clicked_point ",1,&target_widget::clicked_point,this);
+    sub = n.subscribe("/clicked_point",1,&target_widget::clicked_point,this);
     
     std::vector<std::string> coord_vec;
     coord_vec.push_back("x [m]");
