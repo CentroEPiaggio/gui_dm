@@ -12,6 +12,8 @@
 #include <map>
 #include "ros/ros.h"
 #include "geometry_msgs/Pose.h"
+#include "geometry_msgs/PointStamped.h"
+#include "dual_manipulation_shared/gui_target_service.h"
 
 class target_widget: public QWidget
 {
@@ -35,7 +37,12 @@ private:
   QPushButton set_target_button;
   geometry_msgs::Pose target_pose;
   ros::NodeHandle n;
-  ros::Publisher target_pub;
+
+  ros::ServiceServer gui_target_service;
+  bool gui_target_service_callback(dual_manipulation_shared::gui_target_service::Request &req, dual_manipulation_shared::gui_target_service::Response &res);
+  ros::Subscriber sub;
+  bool target_ready=false;
+  void clicked_point(const geometry_msgs::PointStampedPtr& point);
 };
 
 #endif // TARGET_WIDGET_H
