@@ -10,8 +10,9 @@ control_widget::control_widget()
     std::vector<std::string> command_vec;
     command_vec.push_back("get_info");
     command_vec.push_back("plan");
-    command_vec.push_back("start_moving");
     command_vec.push_back("abort_plan");
+    command_vec.push_back("start_moving");
+    command_vec.push_back("abort_move");
     command_vec.push_back("exit");
 
     for(auto item:command_vec)
