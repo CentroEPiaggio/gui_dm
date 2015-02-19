@@ -9,7 +9,7 @@ void thread_body()
     while(1)
     {
 	ros::spinOnce(); 
-	usleep(200000);
+	usleep(20000);
     }
 }
 
