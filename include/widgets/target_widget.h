@@ -14,6 +14,8 @@
 #include "geometry_msgs/Pose.h"
 #include "geometry_msgs/PointStamped.h"
 #include "dual_manipulation_shared/gui_target_service.h"
+#include <interactive_markers/interactive_marker_server.h>
+#include <visualization_msgs/MarkerArray.h>
 
 class target_widget: public QWidget
 {
@@ -44,6 +46,15 @@ private:
   bool target_ready=false;
   void clicked_point(const geometry_msgs::PointStampedPtr& point);
   void update_coords();
+  void publish_marker();
+
+  ros::Subscriber sub_im, im_sub_fb;
+  ros::Publisher pub_target;
+  interactive_markers::InteractiveMarkerServer* server;
+  visualization_msgs::InteractiveMarker* int_marker;
+  void update_position(const visualization_msgs::Marker &marker_);
+  visualization_msgs::Marker target_marker;
+  void im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback);
 };
 
 #endif // TARGET_WIDGET_H
