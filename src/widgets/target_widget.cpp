@@ -158,25 +158,31 @@ target_widget::target_widget()
 
 void target_widget::on_object_changed()
 {
+    //TODO: make it work!
+
 //     std::string path = ros::package::getPath("dual_manipulation_grasp_db");
 //     path.append("/object_meshes/");
-    std::string path = "package://dual_manipulation_grasp_db/object_meshes/";
-    for(auto item:db_mapper.Objects)
-    {
-	if(std::get<0>(item.second) == object_selection.currentText().toStdString())
-	{
-	    path.append(std::get<1>(item.second));
-	    break;
-	}
-    }
+// //     std::string path = "package://dual_manipulation_grasp_db/object_meshes/";
+//     for(auto item:db_mapper.Objects)
+//     {
+// 	if(std::get<0>(item.second) == object_selection.currentText().toStdString())
+// 	{
+// 	    path.append(std::get<1>(item.second));
+// 	    break;
+// 	}
+//     }
+//     
+//     std::cout<<"object path: "<<path<<std::endl;
+// 
+//     source_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
+//     source_marker.mesh_resource = path.c_str();
+//     
+//     target_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
+//     target_marker.mesh_resource = path.c_str();
     
-    std::cout<<"object path: "<<path<<std::endl;
-
-    source_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
-    source_marker.mesh_resource = path.c_str();
+    source_marker.type = visualization_msgs::Marker::CYLINDER;
     
-    target_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
-    target_marker.mesh_resource = path.c_str();
+    target_marker.type = visualization_msgs::Marker::CYLINDER;
 }
 
 void target_widget::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback)
@@ -249,13 +255,13 @@ void target_widget::update_position(const visualization_msgs::Marker &marker_)
 
 void target_widget::clicked_point(const geometry_msgs::PointStampedPtr& point)
 {
-    if(clicking_pose.currentText().toStdString()=="target")
+    if(clicking_pose.currentText().toStdString()=="CLICK: target")
     {
 	target_pose.position = point->point;
 	update_coords(target_coord_map,target_pose);
 	publish_marker();
     }
-    if(clicking_pose.currentText().toStdString()=="source")
+    if(clicking_pose.currentText().toStdString()=="CLICK: source")
     {
 	source_pose.position = point->point;
 	update_coords(source_coord_map,source_pose);
