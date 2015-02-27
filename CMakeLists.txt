@@ -14,7 +14,7 @@ else()
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-find_package(catkin REQUIRED COMPONENTS rviz roscpp)
+find_package(catkin REQUIRED COMPONENTS rviz roscpp dual_manipulation_shared)
 catkin_package()
 include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
@@ -57,3 +57,5 @@ set(SOURCE_FILES
 add_executable(dual_manipulation_gui ${SOURCE_FILES})
 
 target_link_libraries(dual_manipulation_gui ${QT_LIBRARIES} ${catkin_LIBRARIES})
+
+add_dependencies(dual_manipulation_gui dual_manipulation_shared_gencpp)

@@ -1,15 +1,25 @@
 #include "widgets/target_widget.h"
 #include <dual_manipulation_shared/gui_target_service.h>
 #include "tf/tf.h"
+#include <ros/package.h>
 
 target_widget::target_widget()
 {
+    gui_target_service = n.advertiseService("gui_target_service", &target_widget::gui_target_service_callback, this);
+    sub = n.subscribe("/clicked_point",1,&target_widget::clicked_point,this);
+
     int glob_id = 0;
     int row = 0;
     int col = 0;
+
+    source_label.setText("Source");
+    source_label.setStyleSheet("color : green");
+
+    target_label.setText("Target");
+    target_label.setStyleSheet("color : red");
     
-    gui_target_service = n.advertiseService("gui_target_service", &target_widget::gui_target_service_callback, this);
-    sub = n.subscribe("/clicked_point",1,&target_widget::clicked_point,this);
+    main_layout.addWidget(&source_label,row,0,Qt::AlignCenter);
+    main_layout.addWidget(&target_label,row,2,Qt::AlignCenter);
     
     std::vector<std::string> coord_vec;
     coord_vec.push_back("x [m]");
@@ -18,54 +28,118 @@ target_widget::target_widget()
     coord_vec.push_back("ro [rad]");
     coord_vec.push_back("pi [rad]");
     coord_vec.push_back("ya [rad]");
-    
+
+    row++;
+
     for(auto item:coord_vec)
     {
 	QHBoxLayout* temp_layout = new QHBoxLayout();
 	QLabel* label = new QLabel(QString::fromStdString(item));
 	label->setFixedSize(60,30);
-	coord_label.push_back(label);
+	source_coord_label.push_back(label);
 	QLineEdit* edit = new QLineEdit();
 	edit->setFixedSize(80,30);
 	edit->setText(QString::number(0.0, 'f', 2));
-	coord_map[glob_id] = edit;
+	source_coord_map[glob_id] = edit;
 	temp_layout->addWidget(label);
 	temp_layout->addWidget(edit);
-	coord_sublayout.push_back(temp_layout);
+	source_coord_sublayout.push_back(temp_layout);
 	
-	connect (edit, SIGNAL(textChanged(QString)),&signalMapper, SLOT(map())) ;
-	signalMapper.setMapping(edit, glob_id) ;
+	connect (edit, SIGNAL(textChanged(QString)),&source_signalMapper, SLOT(map())) ;
+	source_signalMapper.setMapping(edit, glob_id) ;
 	glob_id++;
 
 	if(glob_id == coord_vec.size()/2+1)
 	{
-	    row++;
-	    col=0;
+	    row=1;
+	    col++;
 	}
-	main_layout.addLayout(temp_layout,row,col++,Qt::AlignCenter);
+	main_layout.addLayout(temp_layout,row++,col,Qt::AlignCenter);
     }
   
-    connect (&signalMapper, SIGNAL(mapped(int)), this, SLOT(on_coord_edit_changed(int))) ;
-    
+    connect (&source_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_source_coord_edit_changed(int))) ;    
+
+    glob_id = 0;
+    row=1;
+    col=2;
+
+    for(auto item:coord_vec)
+    {
+	QHBoxLayout* temp_layout = new QHBoxLayout();
+	QLabel* label = new QLabel(QString::fromStdString(item));
+	label->setFixedSize(60,30);
+	target_coord_label.push_back(label);
+	QLineEdit* edit = new QLineEdit();
+	edit->setFixedSize(80,30);
+	edit->setText(QString::number(0.0, 'f', 2));
+	target_coord_map[glob_id] = edit;
+	temp_layout->addWidget(label);
+	temp_layout->addWidget(edit);
+	target_coord_sublayout.push_back(temp_layout);
+	
+	connect (edit, SIGNAL(textChanged(QString)),&target_signalMapper, SLOT(map())) ;
+	target_signalMapper.setMapping(edit, glob_id) ;
+	glob_id++;
+
+	if(glob_id == coord_vec.size()/2+1)
+	{
+	    row=1;
+	    col++;
+	}
+	main_layout.addLayout(temp_layout,row++,col,Qt::AlignCenter);
+    }
+
+    connect (&target_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_target_coord_edit_changed(int))) ;
+
     set_target_button.setText("Set Target");
+    publish_button.setText("Publish Markers");
     
     connect(&set_target_button, SIGNAL(clicked()), this, SLOT(on_set_target_clicked()));
+    connect(&publish_button, SIGNAL(clicked(bool)), this, SLOT(publish_marker()));
+
+    for(auto item:db_mapper.Objects)
+    object_selection.addItem(QString::fromStdString(std::get<0>(item.second)));
     
-    main_layout.addWidget(&set_target_button,row+1,coord_vec.size()/4,Qt::AlignCenter);
+    connect(&object_selection, SIGNAL(currentIndexChanged(QString)), this, SLOT(on_object_changed()));
+
+    clicking_pose.addItem("CLICK: source");
+    clicking_pose.addItem("CLICK: target");
+    clicking_pose.setCurrentIndex(0);
+
+    main_layout.addWidget(&object_selection,row+1,0,Qt::AlignCenter);
+    main_layout.addWidget(&set_target_button,row+1,1,Qt::AlignCenter);
+    main_layout.addWidget(&publish_button,row+1,2,Qt::AlignCenter);
+    main_layout.addWidget(&clicking_pose,row+1,3,Qt::AlignCenter);
   
     setLayout(&main_layout);
     
     target_pose.orientation.w=1;
+    source_pose.orientation.w=1;
     
-    sub_im = n.subscribe("/target_marker",1,&target_widget::update_position,this);
-    server = new interactive_markers::InteractiveMarkerServer("target_interactive_marker");
+    sub_im = n.subscribe("/objects_marker",2,&target_widget::update_position,this);
+    server = new interactive_markers::InteractiveMarkerServer("objects_interactive_marker");
     int_marker = new visualization_msgs::InteractiveMarker();
     int_marker->header.frame_id = "/world";
-    int_marker->name = "target__interactive";
+    int_marker->name = "source_interactive";
     int_marker->description = "";
-    pub_target = n.advertise<visualization_msgs::Marker>( "/target_marker", 1000 );
-    im_sub_fb = n.subscribe("/target_interactive_marker/feedback",1,&target_widget::im_callback,this);
-    
+    int_marker->name="objects_im_marker";
+    int_marker->scale=0.2;
+    pub_target = n.advertise<visualization_msgs::Marker>( "/objects_marker", 1000 );
+    im_sub_fb = n.subscribe("/objects_interactive_marker/feedback",1,&target_widget::im_callback,this);
+
+    source_marker.color.a=1;
+    source_marker.color.r=0;
+    source_marker.color.g=1;
+    source_marker.color.b=0;
+    source_marker.header.frame_id = "/world";
+    source_marker.id=1;
+    source_marker.ns="source";
+    source_marker.lifetime = ros::DURATION_MAX;
+    source_marker.scale.x = 0.1;
+    source_marker.scale.y = 0.1;
+    source_marker.scale.z = 0.1;
+    source_marker.pose.orientation.w=1;
+
     target_marker.color.a=1;
     target_marker.color.r=1;
     target_marker.color.g=0;
@@ -77,14 +151,46 @@ target_widget::target_widget()
     target_marker.scale.x = 0.1;
     target_marker.scale.y = 0.1;
     target_marker.scale.z = 0.1;
-    target_marker.type = visualization_msgs::Marker::CYLINDER;
     target_marker.pose.orientation.w=1;
+
+    on_object_changed(); //to set the initial object shape
+}
+
+void target_widget::on_object_changed()
+{
+//     std::string path = ros::package::getPath("dual_manipulation_grasp_db");
+//     path.append("/object_meshes/");
+    std::string path = "package://dual_manipulation_grasp_db/object_meshes/";
+    for(auto item:db_mapper.Objects)
+    {
+	if(std::get<0>(item.second) == object_selection.currentText().toStdString())
+	{
+	    path.append(std::get<1>(item.second));
+	    break;
+	}
+    }
+    
+    std::cout<<"object path: "<<path<<std::endl;
+
+    source_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
+    source_marker.mesh_resource = path.c_str();
+    
+    target_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
+    target_marker.mesh_resource = path.c_str();
 }
 
 void target_widget::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback)
-{     
-    target_pose = feedback.pose;
-    update_coords();
+{   
+    if(feedback.marker_name=="source")
+    {
+	source_pose = feedback.pose;
+	update_coords(source_coord_map,source_pose);
+    }
+    if(feedback.marker_name=="target")
+    {
+	target_pose = feedback.pose;
+	update_coords(target_coord_map,target_pose);
+    }
 }
 
 void target_widget::update_position(const visualization_msgs::Marker &marker_)
@@ -139,14 +245,22 @@ void target_widget::update_position(const visualization_msgs::Marker &marker_)
     server->insert(*int_marker);
 
     server->applyChanges();
-
 }
 
 void target_widget::clicked_point(const geometry_msgs::PointStampedPtr& point)
 {
-    target_pose.position = point->point;
-    update_coords();
-    publish_marker();
+    if(clicking_pose.currentText().toStdString()=="target")
+    {
+	target_pose.position = point->point;
+	update_coords(target_coord_map,target_pose);
+	publish_marker();
+    }
+    if(clicking_pose.currentText().toStdString()=="source")
+    {
+	source_pose.position = point->point;
+	update_coords(source_coord_map,source_pose);
+	publish_marker();
+    }
 }
 
 bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_target_service::Request& req, dual_manipulation_shared::gui_target_service::Response& res)
@@ -160,17 +274,43 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
     target_ready=false;
     
     res.target_pose = target_pose;
+    res.source_pose = source_pose;
 
     return res.ack;
 }
 
-void target_widget::on_coord_edit_changed(const int& id)
+void target_widget::on_source_coord_edit_changed(const int& id)
 {
-    ROS_DEBUG_STREAM("coord changed "<<'('<<id<<"): "<<coord_map.at(id)->text().toStdString());
+    ROS_DEBUG_STREAM("source coord changed "<<'('<<id<<"): "<<source_coord_map.at(id)->text().toStdString());
     
-    if(id==0) target_pose.position.x = coord_map.at(id)->text().toDouble();
-    if(id==1) target_pose.position.y = coord_map.at(id)->text().toDouble();
-    if(id==2) target_pose.position.z = coord_map.at(id)->text().toDouble();
+    if(id==0) source_pose.position.x = source_coord_map.at(id)->text().toDouble();
+    if(id==1) source_pose.position.y = source_coord_map.at(id)->text().toDouble();
+    if(id==2) source_pose.position.z = source_coord_map.at(id)->text().toDouble();
+    
+    if(id>2)
+    {
+	double ro,pi,ya;
+	tf::Quaternion q;
+	tf::quaternionMsgToTF(source_pose.orientation,q);
+	tf::Matrix3x3(q).getRPY(ro,pi,ya);
+      
+	if(id==3) q.setRPY(source_coord_map.at(id)->text().toDouble(),pi,ya);
+	if(id==4) q.setRPY(ro,source_coord_map.at(id)->text().toDouble(),ya);
+	if(id==5) q.setRPY(ro,pi,source_coord_map.at(id)->text().toDouble());
+	
+	tf::quaternionTFToMsg(q,source_pose.orientation);
+    }
+
+    publish_marker();
+}
+
+void target_widget::on_target_coord_edit_changed(const int& id)
+{
+    ROS_DEBUG_STREAM("target coord changed "<<'('<<id<<"): "<<target_coord_map.at(id)->text().toStdString());
+    
+    if(id==0) target_pose.position.x = target_coord_map.at(id)->text().toDouble();
+    if(id==1) target_pose.position.y = target_coord_map.at(id)->text().toDouble();
+    if(id==2) target_pose.position.z = target_coord_map.at(id)->text().toDouble();
     
     if(id>2)
     {
@@ -179,9 +319,9 @@ void target_widget::on_coord_edit_changed(const int& id)
 	tf::quaternionMsgToTF(target_pose.orientation,q);
 	tf::Matrix3x3(q).getRPY(ro,pi,ya);
       
-	if(id==3) q.setRPY(coord_map.at(id)->text().toDouble(),pi,ya);
-	if(id==4) q.setRPY(ro,coord_map.at(id)->text().toDouble(),ya);
-	if(id==5) q.setRPY(ro,pi,coord_map.at(id)->text().toDouble());
+	if(id==3) q.setRPY(target_coord_map.at(id)->text().toDouble(),pi,ya);
+	if(id==4) q.setRPY(ro,target_coord_map.at(id)->text().toDouble(),ya);
+	if(id==5) q.setRPY(ro,pi,target_coord_map.at(id)->text().toDouble());
 	
 	tf::quaternionTFToMsg(q,target_pose.orientation);
     }
@@ -193,17 +333,20 @@ void target_widget::publish_marker()
 {
     target_marker.pose = target_pose;
     pub_target.publish(target_marker);
+    
+    source_marker.pose = source_pose;
+    pub_target.publish(source_marker);
 }
 
-void target_widget::update_coords()
+void target_widget::update_coords(std::map<int,QLineEdit*> coord_map, geometry_msgs::Pose pose)
 {
-    coord_map.at(0)->setText(QString::number(target_pose.position.x, 'f', 2));
-    coord_map.at(1)->setText(QString::number(target_pose.position.y, 'f', 2));
-    coord_map.at(2)->setText(QString::number(target_pose.position.z, 'f', 2));
+    coord_map.at(0)->setText(QString::number(pose.position.x, 'f', 2));
+    coord_map.at(1)->setText(QString::number(pose.position.y, 'f', 2));
+    coord_map.at(2)->setText(QString::number(pose.position.z, 'f', 2));
     
     double ro,pi,ya;
     tf::Quaternion q;
-    tf::quaternionMsgToTF(target_pose.orientation,q);
+    tf::quaternionMsgToTF(pose.orientation,q);
     tf::Matrix3x3(q).getRPY(ro,pi,ya);
     
     coord_map.at(3)->setText(QString::number(ro, 'f', 2));
@@ -220,12 +363,22 @@ void target_widget::on_set_target_clicked()
 
 target_widget::~target_widget()
 {
-    for(auto item:coord_map)
+    for(auto item:source_coord_map)
     {
         delete item.second;
     }
-    
-    for(auto item:coord_sublayout)
+
+    for(auto item:target_coord_map)
+    {
+        delete item.second;
+    }
+
+    for(auto item:source_coord_sublayout)
+    {
+	delete item;
+    }
+
+    for(auto item:target_coord_sublayout)
     {
 	delete item;
     }
