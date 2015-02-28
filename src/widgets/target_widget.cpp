@@ -266,14 +266,11 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
     res.ack = true;
 
     ROS_INFO_STREAM("Accepted request to set target pose: "<<req.info.c_str()<<" |> please set the object position <|");
-    
-    while(!target_ready){ros::spinOnce();};
-    
+    ros::spinOnce();
+    if (!target_ready) res.ack=false;
     target_ready=false;
-    
     res.target_pose = target_pose;
     res.source_pose = source_pose;
-
     return res.ack;
 }
 
