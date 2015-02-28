@@ -153,10 +153,10 @@ target_widget::target_widget()
     target_marker.scale.z = 1;
     target_marker.pose.orientation.w=1;
 
-    on_object_changed(); //to set the initial object shape
+    update_mesh_resources(); //to set the initial object shape
 }
 
-void target_widget::on_object_changed()
+void target_widget::update_mesh_resources()
 {
     std::string path = "package://dual_manipulation_grasp_db/object_meshes/";
     for(auto item:db_mapper.Objects)
@@ -175,6 +175,12 @@ void target_widget::on_object_changed()
     
     target_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
     target_marker.mesh_resource = path.c_str();
+}
+
+void target_widget::on_object_changed()
+{
+    update_mesh_resources();
+    publish_marker();
 }
 
 void target_widget::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback)

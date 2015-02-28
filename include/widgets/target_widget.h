@@ -69,6 +69,7 @@ private:
   void im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback);
 
   databaseMapper db_mapper;
+  void update_mesh_resources();
 };
 
 #endif // TARGET_WIDGET_H
