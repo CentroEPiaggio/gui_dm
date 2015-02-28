@@ -135,9 +135,9 @@ target_widget::target_widget()
     source_marker.id=1;
     source_marker.ns="source";
     source_marker.lifetime = ros::DURATION_MAX;
-    source_marker.scale.x = 0.1;
-    source_marker.scale.y = 0.1;
-    source_marker.scale.z = 0.1;
+    source_marker.scale.x = 1;
+    source_marker.scale.y = 1;
+    source_marker.scale.z = 1;
     source_marker.pose.orientation.w=1;
 
     target_marker.color.a=1;
@@ -148,9 +148,9 @@ target_widget::target_widget()
     target_marker.id=1;
     target_marker.ns="target";
     target_marker.lifetime = ros::DURATION_MAX;
-    target_marker.scale.x = 0.1;
-    target_marker.scale.y = 0.1;
-    target_marker.scale.z = 0.1;
+    target_marker.scale.x = 1;
+    target_marker.scale.y = 1;
+    target_marker.scale.z = 1;
     target_marker.pose.orientation.w=1;
 
     on_object_changed(); //to set the initial object shape
@@ -158,31 +158,23 @@ target_widget::target_widget()
 
 void target_widget::on_object_changed()
 {
-    //TODO: make it work!
+    std::string path = "package://dual_manipulation_grasp_db/object_meshes/";
+    for(auto item:db_mapper.Objects)
+    {
+	if(std::get<0>(item.second) == object_selection.currentText().toStdString())
+	{
+	    path.append(std::get<1>(item.second));
+	    break;
+	}
+    }
+    
+    ROS_DEBUG_STREAM("object path: "<<path<<std::endl);
 
-//     std::string path = ros::package::getPath("dual_manipulation_grasp_db");
-//     path.append("/object_meshes/");
-// //     std::string path = "package://dual_manipulation_grasp_db/object_meshes/";
-//     for(auto item:db_mapper.Objects)
-//     {
-// 	if(std::get<0>(item.second) == object_selection.currentText().toStdString())
-// 	{
-// 	    path.append(std::get<1>(item.second));
-// 	    break;
-// 	}
-//     }
-//     
-//     std::cout<<"object path: "<<path<<std::endl;
-// 
-//     source_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
-//     source_marker.mesh_resource = path.c_str();
-//     
-//     target_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
-//     target_marker.mesh_resource = path.c_str();
+    source_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
+    source_marker.mesh_resource = path.c_str();
     
-    source_marker.type = visualization_msgs::Marker::CYLINDER;
-    
-    target_marker.type = visualization_msgs::Marker::CYLINDER;
+    target_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
+    target_marker.mesh_resource = path.c_str();
 }
 
 void target_widget::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback)
