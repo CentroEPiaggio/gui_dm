@@ -19,7 +19,7 @@ catkin_package()
 include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
-find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+find_package(Qt4 COMPONENTS QtCore QtGui QtSvg REQUIRED)
 include(${QT_USE_FILE})
 
 add_definitions(-DQT_NO_KEYWORDS)
@@ -35,6 +35,7 @@ qt4_wrap_cpp(WIDGETS_MOC_FILES
   include/widgets/state_widget.h
   include/widgets/control_widget.h
   include/widgets/target_widget.h
+  include/widgets/image_widget.h
 )
 
 set(WIDGET_SOURCE_FILES
@@ -44,6 +45,7 @@ set(WIDGET_SOURCE_FILES
   src/widgets/state_widget.cpp
   src/widgets/control_widget.cpp
   src/widgets/target_widget.cpp
+  src/widgets/image_widget.cpp
 )
 
 set(SOURCE_FILES
