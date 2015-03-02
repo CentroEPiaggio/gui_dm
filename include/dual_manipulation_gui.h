@@ -22,7 +22,7 @@ private:
   
 //   render_3d_widget render;
 //   camera_widget camera;
-//   state_machine_widget state_machine;
+  state_machine_widget state_machine;
 //   state_widget state;
   control_widget control;
   target_widget target;
