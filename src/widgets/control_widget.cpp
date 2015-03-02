@@ -46,13 +46,38 @@ control_widget::control_widget()
 
     connect(&stop_robot_button,SIGNAL(clicked(bool)), this, SLOT(on_stop_robot_button_clicked()));
 
-    main_layout.addWidget(&stop_robot_button,row+2,1,Qt::AlignCenter);
+    home_robot_button.setFixedSize(45,45);
+    home_robot_button.setIcon(QIcon(path_to_package + "/home.png"));
+    home_robot_button.setIconSize( QSize(home_robot_button.size().width(), home_robot_button.size().height() ));
+
+    connect(&home_robot_button,SIGNAL(clicked(bool)), this, SLOT(on_home_robot_button_clicked()));
+
+    main_layout.addWidget(&home_robot_button,row+2,0,Qt::AlignCenter);
+    main_layout.addWidget(&stop_robot_button,row+2,2,Qt::AlignCenter);
 
     setLayout(&main_layout);
     
     client = n.serviceClient<dual_manipulation_shared::state_manager_service>("state_manager_ros_service");
     ik_client = n.serviceClient<dual_manipulation_shared::ik_service>("ik_ros_service");
 }
+
+void control_widget::on_home_robot_button_clicked()
+{
+    ROS_DEBUG_STREAM("command HOME to ik_control");
+
+    ik_srv.request.command = "home";
+    ik_srv.request.ee_name = "both_hands";
+
+    if (ik_client.call(ik_srv))
+    {
+	ROS_INFO_STREAM("IK Control Request accepted: (" << (int)srv.response.ack << ")");
+    }
+    else
+    {
+	ROS_ERROR("Failed to call service dual_manipulation_shared::ik_service");
+    }
+}
+
 
 void control_widget::on_stop_robot_button_clicked()
 {

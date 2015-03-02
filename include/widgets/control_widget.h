@@ -21,11 +21,13 @@ public:
 private Q_SLOTS:
   void on_command_button_clicked(const int& id);
   void on_stop_robot_button_clicked();
+  void on_home_robot_button_clicked();
 
 private:
   QSignalMapper signalMapper;
   QGridLayout main_layout;
 
+  QPushButton home_robot_button;
   QPushButton stop_robot_button;
 
   std::map<int,QPushButton*> map_button;
