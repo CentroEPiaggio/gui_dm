@@ -13,7 +13,7 @@ state_machine_widget::state_machine_widget()
     label->setMinimumSize(30,30);*/
 
     Viewer* temp= new Viewer(this);
-    temp->setBackImage(img_path);
+//     temp->setBackImage(img_path);
 
     label_layout = new QGridLayout();
 //     label_layout->addWidget(label);

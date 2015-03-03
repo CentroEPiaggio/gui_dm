@@ -11,6 +11,9 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QDebug>
+#include <mutex>
+#include <ros/node_handle.h>
+#include <dual_manipulation_shared/graph.h>
 class Viewer : public QGraphicsView
 {
 public:
@@ -19,20 +22,24 @@ public:
     void setScalingFactor ( double scalingFactorX, double scalingFactorY );
     void setTranslateFactor ( double tx=0,double ty=0 );
     void setBackImage ( std::string path );
-
+    void paintEvent ( QPaintEvent *event );
+    
 protected:
     virtual void wheelEvent(QWheelEvent* event);
 
 private:
     void closeEvent ( QCloseEvent *event );
-
+    void subscriber_callback(const dual_manipulation_shared::graph::ConstPtr& graph_msg);
     int timerId;
-
+    ros::NodeHandle node;
+    ros::Subscriber graph_sub;
     std::string backImage;
     QImage image;
     QPixmap pixmap;
     QGraphicsScene* Scene;
-
+    std::mutex mutex;
+    dual_manipulation_shared::graph graph_msg;
+    bool new_message;
 public:
     double scalingFactorX, scalingFactorY, translateX, translateY;
     void setScalingAndTranslateFactor ( double maxX,double minX,double maxY,double minY );
