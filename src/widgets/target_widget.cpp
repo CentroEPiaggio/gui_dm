@@ -129,8 +129,8 @@ target_widget::target_widget()
 
     source_marker.color.a=1;
     source_marker.color.r=0;
-    source_marker.color.g=1;
-    source_marker.color.b=0;
+    source_marker.color.g=0;
+    source_marker.color.b=1;
     source_marker.header.frame_id = "/world";
     source_marker.id=1;
     source_marker.ns="source";
