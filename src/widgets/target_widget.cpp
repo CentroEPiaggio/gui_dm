@@ -288,6 +288,7 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
 
 void target_widget::on_source_coord_edit_changed(const int& id)
 {
+    callback_mutex.lock();
     ROS_DEBUG_STREAM("source coord changed "<<'('<<id<<"): "<<source_coord_map.at(id)->text().toStdString());
     
     if(id==0) source_pose.position.x = source_coord_map.at(id)->text().toDouble();
@@ -309,10 +310,12 @@ void target_widget::on_source_coord_edit_changed(const int& id)
     }
 
     publish_marker();
+    callback_mutex.unlock();
 }
 
 void target_widget::on_target_coord_edit_changed(const int& id)
 {
+    callback_mutex.lock();
     ROS_DEBUG_STREAM("target coord changed "<<'('<<id<<"): "<<target_coord_map.at(id)->text().toStdString());
     
     if(id==0) target_pose.position.x = target_coord_map.at(id)->text().toDouble();
@@ -334,6 +337,7 @@ void target_widget::on_target_coord_edit_changed(const int& id)
     }
 
     publish_marker();
+    callback_mutex.unlock();
 }
 
 void target_widget::publish_marker()
