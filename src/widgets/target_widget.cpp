@@ -2,6 +2,7 @@
 #include <dual_manipulation_shared/gui_target_service.h>
 #include "tf/tf.h"
 #include <ros/package.h>
+#include <QSettings>
 
 target_widget::target_widget()
 {
@@ -30,7 +31,8 @@ target_widget::target_widget()
     coord_vec.push_back("ya [rad]");
 
     row++;
-
+    QSettings settings;
+    
     for(auto item:coord_vec)
     {
 	QHBoxLayout* temp_layout = new QHBoxLayout();
@@ -39,7 +41,11 @@ target_widget::target_widget()
 	source_coord_label.push_back(label);
 	QLineEdit* edit = new QLineEdit();
 	edit->setFixedSize(80,30);
-	edit->setText(QString::number(0.0, 'f', 2));
+        QString s("source");
+        s.append(QString::number(glob_id));
+        double value=0.0;
+        value=settings.value(s,value).toDouble();
+ 	edit->setText(QString::number(value, 'f', 2));
 	source_coord_map[glob_id] = edit;
 	temp_layout->addWidget(label);
 	temp_layout->addWidget(edit);
@@ -71,7 +77,11 @@ target_widget::target_widget()
 	target_coord_label.push_back(label);
 	QLineEdit* edit = new QLineEdit();
 	edit->setFixedSize(80,30);
-	edit->setText(QString::number(0.0, 'f', 2));
+        QString s("target");
+        s.append(QString::number(glob_id));
+        double value=0.0;
+        value=settings.value(s,value).toDouble();
+        edit->setText(QString::number(value, 'f', 2));
 	target_coord_map[glob_id] = edit;
 	temp_layout->addWidget(label);
 	temp_layout->addWidget(edit);
@@ -370,7 +380,21 @@ void target_widget::update_coords(std::map<int,QLineEdit*> coord_map, geometry_m
 void target_widget::on_set_target_clicked()
 {
     ROS_INFO_STREAM("Target Set!");
-    
+    QSettings settings;
+    for (auto coord:source_coord_map)
+    {
+        QString s("source");
+        double value=coord.second->text().toDouble();
+        s.append(QString::number(coord.first));
+        settings.setValue(s,value);
+    }
+    for (auto coord:target_coord_map)
+    {
+        QString s("target");
+        double value=coord.second->text().toDouble();
+        s.append(QString::number(coord.first));
+        settings.setValue(s,value);
+    }
     target_ready = true;
 }
 

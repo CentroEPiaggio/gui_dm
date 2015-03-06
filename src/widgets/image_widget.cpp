@@ -21,7 +21,13 @@ using namespace std;
 void Viewer::subscriber_callback(const dual_manipulation_shared::graph::ConstPtr& graph_msg)
 {
     mutex.lock();
-    this->graph_msg=*graph_msg;
+    this->graph_msg.node_id=graph_msg->node_id;
+    this->graph_msg.path_node_ids=graph_msg->path_node_ids;
+    this->graph_msg.source=graph_msg->source;
+    this->graph_msg.target=graph_msg->target;
+    this->graph_msg.text=graph_msg->text;
+    this->graph_msg.x=graph_msg->x;
+    this->graph_msg.y=graph_msg->y;
     new_message=true;
     mutex.unlock();
     return;
@@ -107,7 +113,6 @@ void Viewer::paintEvent ( QPaintEvent *event )
     mutex.lock();
     if (new_message)
     {
-    auto graph_msg=&this->graph_msg;
     new_message=false;
     Scene->clear();
     QPen temp;
@@ -119,43 +124,43 @@ void Viewer::paintEvent ( QPaintEvent *event )
     brush.setColor ( QColor ( "lightgreen" ) );
     std::map<int,int> id_to_position;
     std::set<int> path_node_ids;
-    for (int i=0;i<graph_msg->path_node_ids.size(); i++)
+    for (int i=0;i<graph_msg.path_node_ids.size(); i++)
     {
-        path_node_ids.insert(graph_msg->path_node_ids[i]);
+        path_node_ids.insert(graph_msg.path_node_ids[i]);
     }
-    for ( int i=0; i<graph_msg->node_id.size(); i++ )
+    for ( int i=0; i<graph_msg.node_id.size(); i++ )
     {
-        id_to_position[graph_msg->node_id[i]]=i;
-        auto item=Scene->addText (QString ( "" ).fromStdString ( graph_msg->text[i] ) );
-        if (!path_node_ids.count(graph_msg->node_id[i]))
+        id_to_position[graph_msg.node_id[i]]=i;
+        auto item=Scene->addText (QString ( "" ).fromStdString ( graph_msg.text[i] ) );
+        if (!path_node_ids.count(graph_msg.node_id[i]))
         {
-            auto ellipse=Scene->addEllipse(graph_msg->x[i]*2-RADIUS/2.0, graph_msg->y[i]*2-RADIUS/2.0,RADIUS,RADIUS,temp,brush);
+            auto ellipse=Scene->addEllipse(graph_msg.x[i]*2-RADIUS/2.0, graph_msg.y[i]*2-RADIUS/2.0,RADIUS,RADIUS,temp,brush);
             ellipse->setFlag(QGraphicsItem::ItemIsSelectable,true);
         }
         else
         {
-            auto ellipse=Scene->addEllipse(graph_msg->x[i]*2-RADIUS/2.0, graph_msg->y[i]*2-RADIUS/2.0,RADIUS,RADIUS,pen_red,brush_red);
+            auto ellipse=Scene->addEllipse(graph_msg.x[i]*2-RADIUS/2.0, graph_msg.y[i]*2-RADIUS/2.0,RADIUS,RADIUS,pen_red,brush_red);
             ellipse->setFlag(QGraphicsItem::ItemIsSelectable,true);
             item->setDefaultTextColor(Qt::red);
         }
         QFont temp=item->font();
         temp.setPointSize(10);
         item->setFont(temp);
-        item->setPos(graph_msg->x[i]*2-9, graph_msg->y[i]*2+10);
+        item->setPos(graph_msg.x[i]*2-9, graph_msg.y[i]*2+10);
         item->scale(1,-1);
     }
     
     temp.setBrush(QColor("black"));
-    for ( int i=0;i<graph_msg->source.size(); i++ )
+    for ( int i=0;i<graph_msg.source.size(); i++ )
     {
-        Scene->addLine(graph_msg->x[id_to_position[graph_msg->source[i]]]*2, graph_msg->y[id_to_position[graph_msg->source[i]]]*2, 
-                       graph_msg->x[id_to_position[graph_msg->target[i]]]*2, graph_msg->y[id_to_position[graph_msg->target[i]]]*2,temp );
+        Scene->addLine(graph_msg.x[id_to_position[graph_msg.source[i]]]*2, graph_msg.y[id_to_position[graph_msg.source[i]]]*2, 
+                       graph_msg.x[id_to_position[graph_msg.target[i]]]*2, graph_msg.y[id_to_position[graph_msg.target[i]]]*2,temp );
     }
     pen_red.setWidth(5);
-    for ( int i=0;i<graph_msg->path_node_ids.size()-1; i++ )
+    for ( int i=1;i<graph_msg.path_node_ids.size(); i++ )
     {
-        Scene->addLine(graph_msg->x[id_to_position[graph_msg->path_node_ids[i]]]*2, graph_msg->y[id_to_position[graph_msg->path_node_ids[i]]]*2, 
-                       graph_msg->x[id_to_position[graph_msg->path_node_ids[i+1]]]*2, graph_msg->y[id_to_position[graph_msg->path_node_ids[i+1]]]*2,pen_red );
+        Scene->addLine(graph_msg.x[id_to_position[graph_msg.path_node_ids[i-1]]]*2, graph_msg.y[id_to_position[graph_msg.path_node_ids[i-1]]]*2, 
+                       graph_msg.x[id_to_position[graph_msg.path_node_ids[i]]]*2, graph_msg.y[id_to_position[graph_msg.path_node_ids[i]]]*2,pen_red );
     }
     }
     mutex.unlock();    
