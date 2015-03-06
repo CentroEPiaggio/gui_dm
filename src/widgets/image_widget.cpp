@@ -13,7 +13,6 @@
 #include <vector>
 #include <iomanip>
 #include <map>
-#include <boost/config/posix_features.hpp>
 
 using namespace std;
 
@@ -36,7 +35,6 @@ Viewer::Viewer ( QWidget* parent) :QGraphicsView ( parent )
     Scene = new QGraphicsScene(this);
     setScene(Scene);
     scale(1,-1);
-    graph_sub=node.subscribe<dual_manipulation_shared::graph>("computed_graph",1,&Viewer::subscriber_callback,this);
     /*
      * Use the following set of instruction to see the coordinate system of viewer.
      */
@@ -55,8 +53,11 @@ Viewer::Viewer ( QWidget* parent) :QGraphicsView ( parent )
 
 //Use ScrollHand Drag Mode to enable Panning
     setDragMode(ScrollHandDrag);
-    mutex.unlock();
     new_message=false;
+    mutex.unlock();
+    mutex.lock();
+    graph_sub=node.subscribe<dual_manipulation_shared::graph>("computed_graph",1,&Viewer::subscriber_callback,this);
+    mutex.unlock();
 }
 
 void Viewer::wheelEvent(QWheelEvent* event)
@@ -64,7 +65,7 @@ void Viewer::wheelEvent(QWheelEvent* event)
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     // Scale the view / do the zoom
     double scaleFactor = 1.15;
-    if(event->delta() > 0) {
+    if(event->delta() < 0) {
         // Zoom in
         scale(scaleFactor, scaleFactor);
     } else {

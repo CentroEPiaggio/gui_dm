@@ -185,6 +185,7 @@ void target_widget::on_object_changed()
 
 void target_widget::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback)
 {   
+    callback_mutex.lock();
     if(feedback.marker_name=="source")
     {
 	source_pose = feedback.pose;
@@ -195,10 +196,12 @@ void target_widget::im_callback(const visualization_msgs::InteractiveMarkerFeedb
 	target_pose = feedback.pose;
 	update_coords(target_coord_map,target_pose);
     }
+    callback_mutex.unlock();
 }
 
 void target_widget::update_position(const visualization_msgs::Marker &marker_)
 {
+    callback_mutex.lock();
     int_marker->controls.clear();
 
     visualization_msgs::InteractiveMarkerControl box_control;
@@ -249,10 +252,12 @@ void target_widget::update_position(const visualization_msgs::Marker &marker_)
     server->insert(*int_marker);
 
     server->applyChanges();
+    callback_mutex.unlock();
 }
 
 void target_widget::clicked_point(const geometry_msgs::PointStampedPtr& point)
 {
+    callback_mutex.lock();
     if(clicking_pose.currentText().toStdString()=="CLICK: target")
     {
 	target_pose.position = point->point;
@@ -265,6 +270,7 @@ void target_widget::clicked_point(const geometry_msgs::PointStampedPtr& point)
 	update_coords(source_coord_map,source_pose);
 	publish_marker();
     }
+    callback_mutex.unlock();
 }
 
 bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_target_service::Request& req, dual_manipulation_shared::gui_target_service::Response& res)
