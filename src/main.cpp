@@ -21,6 +21,9 @@ int main(int argc, char *argv[])
     }
     
     QApplication a(argc, argv);
+    a.setOrganizationName("CentroEPiaggio");
+    a.setOrganizationDomain("centropiaggio.unipi.it");
+    a.setApplicationName("Dual_Manipulation_GUI");
     dual_manipulation_gui dmg;
     
     QString path_to_package = QString::fromStdString(ros::package::getPath("dual_manipulation_gui"));
