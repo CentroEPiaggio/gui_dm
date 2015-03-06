@@ -109,6 +109,7 @@ target_widget::target_widget()
 
     for(auto item:db_mapper.Objects)
     object_selection.addItem(QString::fromStdString(std::get<0>(item.second)));
+    object_selection.setCurrentIndex(2);
     
     connect(&object_selection, SIGNAL(currentIndexChanged(QString)), this, SLOT(on_object_changed()));
 
@@ -162,6 +163,19 @@ target_widget::target_widget()
     target_marker.scale.y = 1;
     target_marker.scale.z = 1;
     target_marker.pose.orientation.w=1;
+    
+    source_pose.position.x = source_coord_map.at(0)->text().toDouble();
+    source_pose.position.y = source_coord_map.at(1)->text().toDouble();
+    source_pose.position.z = source_coord_map.at(2)->text().toDouble();
+    tf::Quaternion q;
+    q.setRPY(source_coord_map.at(3)->text().toDouble(),source_coord_map.at(4)->text().toDouble(),source_coord_map.at(5)->text().toDouble());
+    tf::quaternionTFToMsg(q,source_pose.orientation);
+    
+    target_pose.position.x = target_coord_map.at(0)->text().toDouble();
+    target_pose.position.y = target_coord_map.at(1)->text().toDouble();
+    target_pose.position.z = target_coord_map.at(2)->text().toDouble();
+    q.setRPY(target_coord_map.at(3)->text().toDouble(),target_coord_map.at(4)->text().toDouble(),target_coord_map.at(5)->text().toDouble());
+    tf::quaternionTFToMsg(q,target_pose.orientation);
 
     update_mesh_resources(); //to set the initial object shape
 }
