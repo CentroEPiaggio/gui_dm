@@ -164,6 +164,7 @@ void target_widget::update_mesh_resources()
 	if(std::get<0>(item.second) == object_selection.currentText().toStdString())
 	{
 	    path.append(std::get<1>(item.second));
+	    obj_id_ = item.first;
 	    break;
 	}
     }
@@ -277,6 +278,7 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
     target_ready=false;
     res.target_pose = target_pose;
     res.source_pose = source_pose;
+    res.obj_id = obj_id_;
     return res.ack;
 }
 

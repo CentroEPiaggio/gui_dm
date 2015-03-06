@@ -59,6 +59,7 @@ private:
   bool target_ready=false;
   void clicked_point(const geometry_msgs::PointStampedPtr& point);
   void update_coords(std::map<int,QLineEdit*> coord_map, geometry_msgs::Pose pose);
+  int obj_id_;
 
   ros::Subscriber sub_im, im_sub_fb;
   ros::Publisher pub_target;
