@@ -11,6 +11,7 @@
 #include <QSignalMapper>
 #include <QComboBox>
 #include <map>
+#include <mutex>
 #include "ros/ros.h"
 #include "geometry_msgs/Pose.h"
 #include "geometry_msgs/PointStamped.h"
@@ -38,6 +39,8 @@ private:
   QGridLayout main_layout;
 
   QLabel source_label, target_label;
+
+  std::mutex callback_mutex;
   
   std::map<int,QLineEdit*> source_coord_map;
   std::map<int,QLineEdit*> target_coord_map;
