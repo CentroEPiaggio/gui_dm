@@ -19,6 +19,7 @@
 #include <interactive_markers/interactive_marker_server.h>
 #include <visualization_msgs/MarkerArray.h>
 #include "dual_manipulation_shared/databasemapper.h"
+#include "tf/transform_broadcaster.h"
 
 class target_widget: public QWidget
 {
@@ -74,6 +75,7 @@ private:
 
   databaseMapper db_mapper;
   void update_mesh_resources();
+  tf::TransformBroadcaster br;
 };
 
 #endif // TARGET_WIDGET_H

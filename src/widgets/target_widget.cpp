@@ -3,6 +3,7 @@
 #include "tf/tf.h"
 #include <ros/package.h>
 #include <QSettings>
+#include "tf_conversions/tf_kdl.h"
 
 target_widget::target_widget()
 {
@@ -221,7 +222,13 @@ void target_widget::im_callback(const visualization_msgs::InteractiveMarkerFeedb
 	target_pose = feedback.pose;
 	update_coords(target_coord_map,target_pose);
     }
+        
+    ros::Duration sleep_time(0.05);
+    tf::Transform current_robot_transform;
+    tf::poseMsgToTF(source_pose,current_robot_transform);
+    br.sendTransform(tf::StampedTransform(current_robot_transform, ros::Time::now(), "world", "cylinder"));
     callback_mutex.unlock();
+    sleep_time.sleep();
 }
 
 void target_widget::update_position(const visualization_msgs::Marker &marker_)
