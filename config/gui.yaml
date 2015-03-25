@@ -1,0 +1,5 @@
+gui_parameters:
+  # this is to set or not the starting object position with the gui_parameters
+  # - true: set with the gui as the target
+  # - false: the perception will find the position and write it in the gui
+  setting_source_position: true

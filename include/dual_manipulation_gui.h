@@ -10,6 +10,8 @@
 #include <widgets/state_widget.h>
 #include <widgets/control_widget.h>
 #include <widgets/target_widget.h>
+#include <XmlRpcValue.h>
+#include "ros/ros.h"
 
 class dual_manipulation_gui: public QWidget
 {
@@ -19,13 +21,16 @@ public:
   ~dual_manipulation_gui();
 
 private:
-  
+  void parseParameters(XmlRpc::XmlRpcValue& params);
+  XmlRpc::XmlRpcValue gui_params;
+  ros::NodeHandle node;
+  bool setting_source_position=false;
 //   render_3d_widget render;
 //   camera_widget camera;
   state_machine_widget state_machine;
 //   state_widget state;
   control_widget control;
-  target_widget target;
+  target_widget* target;
 
   QSplitter main_layout;
   

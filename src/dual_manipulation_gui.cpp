@@ -1,8 +1,11 @@
 #include "dual_manipulation_gui.h"
+#include <dual_manipulation_shared/parsing_utils.h>
 
 dual_manipulation_gui::dual_manipulation_gui(): control(&state_machine),
 main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::Horizontal),control_layout(Qt::Horizontal)
 {
+    if (node.getParam("gui_parameters", gui_params)) parseParameters(gui_params);
+
     visualization_layout.addWidget(&state_machine);
     
     QList<int> list= visualization_layout.sizes();
@@ -10,7 +13,9 @@ main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::
     list.replace(1,visualization_layout.width()/0.5);
     visualization_layout.setSizes(list);
 
-    state_layout.addWidget(&target);
+    target = new target_widget(setting_source_position);
+    
+    state_layout.addWidget(target);
     
     control_layout.addWidget(&control);
   
@@ -27,6 +32,14 @@ main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::
     
     setLayout(new QGridLayout);
     layout()->addWidget(&main_layout);
+}
+
+
+void dual_manipulation_gui::parseParameters(XmlRpc::XmlRpcValue& params)
+{
+    ROS_ASSERT(params.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+    
+    parseSingleParameter(params,setting_source_position,"setting_source_position");
 }
 
 dual_manipulation_gui::~dual_manipulation_gui()

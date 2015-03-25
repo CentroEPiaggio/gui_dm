@@ -25,7 +25,7 @@ class target_widget: public QWidget
 {
 Q_OBJECT
 public:
-  target_widget();
+  target_widget(bool setting_source_position_);
   ~target_widget();
 
 private Q_SLOTS:
@@ -36,6 +36,7 @@ private Q_SLOTS:
   void on_object_changed();
 
 private:
+  bool setting_source_position;
   QSignalMapper source_signalMapper, target_signalMapper;
   QGridLayout main_layout;
 

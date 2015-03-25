@@ -5,7 +5,7 @@
 #include <QSettings>
 #include "tf_conversions/tf_kdl.h"
 
-target_widget::target_widget()
+target_widget::target_widget(bool setting_source_position_): setting_source_position(setting_source_position_)
 {
     gui_target_service = n.advertiseService("gui_target_service", &target_widget::gui_target_service_callback, this);
     sub = n.subscribe("/clicked_point",1,&target_widget::clicked_point,this);
@@ -51,6 +51,7 @@ target_widget::target_widget()
 	temp_layout->addWidget(label);
 	temp_layout->addWidget(edit);
 	source_coord_sublayout.push_back(temp_layout);
+	if(!setting_source_position) edit->setEnabled(false);
 	
 	connect (edit, SIGNAL(textChanged(QString)),&source_signalMapper, SLOT(map())) ;
 	source_signalMapper.setMapping(edit, glob_id) ;
@@ -121,7 +122,7 @@ target_widget::target_widget()
     main_layout.addWidget(&object_selection,row+1,0,Qt::AlignCenter);
     main_layout.addWidget(&set_target_button,row+1,1,Qt::AlignCenter);
     main_layout.addWidget(&publish_button,row+1,2,Qt::AlignCenter);
-    main_layout.addWidget(&clicking_pose,row+1,3,Qt::AlignCenter);
+    if(setting_source_position) main_layout.addWidget(&clicking_pose,row+1,3,Qt::AlignCenter);
   
     setLayout(&main_layout);
     
@@ -290,16 +291,25 @@ void target_widget::update_position(const visualization_msgs::Marker &marker_)
 void target_widget::clicked_point(const geometry_msgs::PointStampedPtr& point)
 {
     callback_mutex.lock();
-    if(clicking_pose.currentText().toStdString()=="CLICK: target")
+    if(setting_source_position)
+    {
+	if(clicking_pose.currentText().toStdString()=="CLICK: target")
+	{
+	    target_pose.position = point->point;
+	    update_coords(target_coord_map,target_pose);
+	    publish_marker();
+	}
+	if(clicking_pose.currentText().toStdString()=="CLICK: source")
+	{
+	    source_pose.position = point->point;
+	    update_coords(source_coord_map,source_pose);
+	    publish_marker();
+	}
+    }
+    else
     {
 	target_pose.position = point->point;
 	update_coords(target_coord_map,target_pose);
-	publish_marker();
-    }
-    if(clicking_pose.currentText().toStdString()=="CLICK: source")
-    {
-	source_pose.position = point->point;
-	update_coords(source_coord_map,source_pose);
 	publish_marker();
     }
     callback_mutex.unlock();
@@ -314,7 +324,7 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
     if (!target_ready) res.ack=false;
     target_ready=false;
     res.target_pose = target_pose;
-    res.source_pose = source_pose;
+    if(setting_source_position) res.source_pose = source_pose;
     res.obj_id = obj_id_;
     return res.ack;
 }
@@ -378,8 +388,11 @@ void target_widget::publish_marker()
     target_marker.pose = target_pose;
     pub_target.publish(target_marker);
     
-    source_marker.pose = source_pose;
-    pub_target.publish(source_marker);
+    if(setting_source_position)
+    {
+	source_marker.pose = source_pose;
+	pub_target.publish(source_marker);
+    }
 }
 
 void target_widget::update_coords(std::map<int,QLineEdit*> coord_map, geometry_msgs::Pose pose)
@@ -402,6 +415,7 @@ void target_widget::on_set_target_clicked()
 {
     ROS_INFO_STREAM("Target Set!");
     QSettings settings;
+    if(setting_source_position)
     for (auto coord:source_coord_map)
     {
         QString s("source");
