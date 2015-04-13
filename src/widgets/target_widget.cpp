@@ -206,6 +206,7 @@ void target_widget::update_mesh_resources()
 
 void target_widget::on_object_changed()
 {
+    source_pose = source_poses.at(object_selection.currentIndex());
     update_mesh_resources();
     publish_marker();
 }
@@ -320,6 +321,32 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
     res.ack = true;
 
     ROS_INFO_STREAM("Accepted request to set target pose: "<<req.info.c_str()<<" |> please set the object position <|");
+
+    if(!setting_source_position)
+    {
+        source_poses.clear();
+        int i=0;
+	for(auto pose:req.source_poses.poses)
+	{
+	    source_poses.push_back(pose.pose);
+	    object_selection.addItem(QString::fromStdString(pose.name));
+	}
+
+	object_selection.setCurrentIndex(0);
+	on_object_changed();
+
+	source_coord_map.at(0)->setText(QString::number(source_pose.position.x, 'f', 2));
+	source_coord_map.at(1)->setText(QString::number(source_pose.position.y, 'f', 2));
+	source_coord_map.at(2)->setText(QString::number(source_pose.position.z, 'f', 2));
+	double roll,pitch,yaw;
+	tf::Quaternion q;
+	tf::quaternionMsgToTF(source_pose.orientation,q);
+	tf::Matrix3x3(q).getRPY(roll,pitch,yaw);
+	source_coord_map.at(0)->setText(QString::number(roll, 'f', 2));
+	source_coord_map.at(0)->setText(QString::number(pitch, 'f', 2));
+	source_coord_map.at(0)->setText(QString::number(yaw, 'f', 2));
+    }
+
     ros::spinOnce();
     if (!target_ready) res.ack=false;
     target_ready=false;
@@ -388,11 +415,8 @@ void target_widget::publish_marker()
     target_marker.pose = target_pose;
     pub_target.publish(target_marker);
     
-    if(setting_source_position)
-    {
-	source_marker.pose = source_pose;
-	pub_target.publish(source_marker);
-    }
+    source_marker.pose = source_pose;
+    pub_target.publish(source_marker);
 }
 
 void target_widget::update_coords(std::map<int,QLineEdit*> coord_map, geometry_msgs::Pose pose)

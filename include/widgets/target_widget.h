@@ -77,6 +77,8 @@ private:
   databaseMapper db_mapper;
   void update_mesh_resources();
   tf::TransformBroadcaster br;
+
+  std::vector<geometry_msgs::Pose> source_poses;
 };
 
 #endif // TARGET_WIDGET_H
