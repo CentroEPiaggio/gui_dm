@@ -4,11 +4,13 @@
 #include <ros/package.h>
 #include <QSettings>
 #include "tf_conversions/tf_kdl.h"
+#include <dual_manipulation_shared/gui_target_response.h>
 
 target_widget::target_widget(bool setting_source_position_): setting_source_position(setting_source_position_)
 {
     gui_target_service = n.advertiseService("gui_target_service", &target_widget::gui_target_service_callback, this);
     sub = n.subscribe("/clicked_point",1,&target_widget::clicked_point,this);
+    target_pub = n.advertise<dual_manipulation_shared::gui_target_response>( "/gui_target_response", 1000 );
 
     int glob_id = 0;
     int row = 0;
@@ -347,12 +349,6 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
 	source_coord_map.at(0)->setText(QString::number(yaw, 'f', 2));
     }
 
-    ros::spinOnce();
-    if (!target_ready) res.ack=false;
-    target_ready=false;
-    res.target_pose = target_pose;
-    res.source_pose = source_pose;
-    res.obj_id = obj_id_;
     return res.ack;
 }
 
@@ -454,7 +450,15 @@ void target_widget::on_set_target_clicked()
         s.append(QString::number(coord.first));
         settings.setValue(s,value);
     }
-    target_ready = true;
+
+    dual_manipulation_shared::gui_target_response msg;
+
+    msg.target_pose = target_pose;
+    msg.source_pose = source_pose;
+    msg.obj_id = obj_id_;
+    msg.name = object_selection.currentText().toStdString();
+
+    target_pub.publish(msg);
 }
 
 target_widget::~target_widget()

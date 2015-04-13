@@ -61,7 +61,6 @@ private:
   ros::ServiceServer gui_target_service;
   bool gui_target_service_callback(dual_manipulation_shared::gui_target_service::Request &req, dual_manipulation_shared::gui_target_service::Response &res);
   ros::Subscriber sub;
-  bool target_ready=false;
   void clicked_point(const geometry_msgs::PointStampedPtr& point);
   void update_coords(std::map<int,QLineEdit*> coord_map, geometry_msgs::Pose pose);
   int obj_id_;
@@ -79,6 +78,7 @@ private:
   tf::TransformBroadcaster br;
 
   std::vector<geometry_msgs::Pose> source_poses;
+  ros::Publisher target_pub;
 };
 
 #endif // TARGET_WIDGET_H
