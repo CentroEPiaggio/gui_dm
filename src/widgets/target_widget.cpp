@@ -351,7 +351,7 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
     if (!target_ready) res.ack=false;
     target_ready=false;
     res.target_pose = target_pose;
-    if(setting_source_position) res.source_pose = source_pose;
+    res.source_pose = source_pose;
     res.obj_id = obj_id_;
     return res.ack;
 }
