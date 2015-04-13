@@ -208,7 +208,7 @@ void target_widget::update_mesh_resources()
 
 void target_widget::on_object_changed()
 {
-    source_pose = source_poses.at(object_selection.currentIndex());
+    if(source_poses.size()>object_selection.currentIndex()) source_pose = source_poses.at(object_selection.currentIndex());
     update_mesh_resources();
     publish_marker();
 }
