@@ -5,6 +5,7 @@
 #include <QSettings>
 #include "tf_conversions/tf_kdl.h"
 #include <dual_manipulation_shared/gui_target_response.h>
+#include "tf/transform_listener.h"
 
 target_widget::target_widget(bool setting_source_position_): setting_source_position(setting_source_position_)
 {
@@ -326,27 +327,54 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
 
     if(!setting_source_position)
     {
+		if(req.source_poses.poses.size()==0)
+		{
+			res.ack = false;
+			return res.ack;
+		}
+
+		tf::TransformListener tf_;
+		std::string err_msg;
+		
+		if(!tf_.waitForTransform("/world",req.source_poses.poses.at(0).parent_frame,ros::Time(0),ros::Duration(1),ros::Duration(0.01),&err_msg))
+		{
+			ROS_ERROR("TF ERROR: %s",err_msg.c_str());
+			res.ack = false;
+			return res.ack;
+		}
+
+		tf::StampedTransform T;
+		tf_.lookupTransform("/world",req.source_poses.poses.at(0).parent_frame,ros::Time(0),T);
+
+		KDL::Frame Camera_Object, World_Object, World_Camera;
+		tf::transformTFToKDL(T,World_Camera);
+		geometry_msgs::Pose object_pose;
+
         source_poses.clear();
         int i=0;
-	for(auto pose:req.source_poses.poses)
-	{
-	    source_poses.push_back(pose.pose);
-	    object_selection.addItem(QString::fromStdString(pose.name));
-	}
+		for(auto pose:req.source_poses.poses)
+		{
+			tf::poseMsgToKDL(pose.pose,Camera_Object);
+			World_Object = World_Camera*Camera_Object;
+			tf::poseKDLToMsg(World_Object,object_pose);
 
-	object_selection.setCurrentIndex(0);
-	on_object_changed();
+			source_poses.push_back(object_pose);
+			object_selection.addItem(QString::fromStdString(pose.name));
+		}
 
-	source_coord_map.at(0)->setText(QString::number(source_pose.position.x, 'f', 2));
-	source_coord_map.at(1)->setText(QString::number(source_pose.position.y, 'f', 2));
-	source_coord_map.at(2)->setText(QString::number(source_pose.position.z, 'f', 2));
-	double roll,pitch,yaw;
-	tf::Quaternion q;
-	tf::quaternionMsgToTF(source_pose.orientation,q);
-	tf::Matrix3x3(q).getRPY(roll,pitch,yaw);
-	source_coord_map.at(0)->setText(QString::number(roll, 'f', 2));
-	source_coord_map.at(0)->setText(QString::number(pitch, 'f', 2));
-	source_coord_map.at(0)->setText(QString::number(yaw, 'f', 2));
+		object_selection.setCurrentIndex(0);
+		on_object_changed();
+
+		source_coord_map.at(0)->setText(QString::number(source_pose.position.x, 'f', 2));
+		source_coord_map.at(1)->setText(QString::number(source_pose.position.y, 'f', 2));
+		source_coord_map.at(2)->setText(QString::number(source_pose.position.z, 'f', 2));
+		double roll,pitch,yaw;
+		tf::Quaternion q;
+		tf::quaternionMsgToTF(source_pose.orientation,q);
+		tf::Matrix3x3(q).getRPY(roll,pitch,yaw);
+		source_coord_map.at(3)->setText(QString::number(roll, 'f', 2));
+		source_coord_map.at(4)->setText(QString::number(pitch, 'f', 2));
+		source_coord_map.at(5)->setText(QString::number(yaw, 'f', 2));
     }
 
     return res.ack;
