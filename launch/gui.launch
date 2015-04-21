@@ -1,6 +1,8 @@
 <launch>
 
-        <rosparam command="load" file="$(find dual_manipulation_gui)/config/gui.yaml" />
+		<!-- Load .yaml configuration files on the param server -->
+		<include file="$(find dual_manipulation_shared)/launch/dual_manipulation.launch"/>
+
         <node name="dual_manipulation_gui" pkg="dual_manipulation_gui" type="dual_manipulation_gui" respawn="false" output="screen"/> 
 
 </launch>

@@ -4,7 +4,7 @@
 dual_manipulation_gui::dual_manipulation_gui(): control(&state_machine),
 main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::Horizontal),control_layout(Qt::Horizontal)
 {
-    if (node.getParam("gui_parameters", gui_params)) parseParameters(gui_params);
+    if (node.getParam("dual_manipulation_parameters", gui_params)) parseParameters(gui_params);
 
     visualization_layout.addWidget(&state_machine);
     
@@ -39,7 +39,10 @@ void dual_manipulation_gui::parseParameters(XmlRpc::XmlRpcValue& params)
 {
     ROS_ASSERT(params.getType() == XmlRpc::XmlRpcValue::TypeStruct);
     
-    parseSingleParameter(params,setting_source_position,"setting_source_position");
+    bool use_vision = !setting_source_position;
+    
+    parseSingleParameter(params,use_vision,"use_vision");
+    setting_source_position = !use_vision;
 }
 
 dual_manipulation_gui::~dual_manipulation_gui()
