@@ -351,6 +351,7 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
 		geometry_msgs::Pose object_pose;
 
         source_poses.clear();
+	object_selection.clear();
         int i=0;
 		for(auto pose:req.source_poses.poses)
 		{
