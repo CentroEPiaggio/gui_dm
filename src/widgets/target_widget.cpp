@@ -190,7 +190,8 @@ void target_widget::update_mesh_resources()
     std::string path = "package://dual_manipulation_grasp_db/object_meshes/";
     for(auto item:db_mapper.Objects)
     {
-	if(std::get<0>(item.second) == object_selection.currentText().toStdString())
+	std::string db_obj_name(std::get<0>(item.second));
+	if(object_selection.currentText().toStdString().compare(0,db_obj_name.length(),db_obj_name) == 0)
 	{
 	    path.append(std::get<1>(item.second));
 	    obj_id_ = item.first;
