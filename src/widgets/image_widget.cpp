@@ -29,6 +29,7 @@ void Viewer::subscriber_callback(const dual_manipulation_shared::graph::ConstPtr
     this->graph_msg.x=graph_msg->x;
     this->graph_msg.y=graph_msg->y;
     new_message=true;
+    Scene->update();
     mutex.unlock();
     return;
 }
