@@ -229,9 +229,6 @@ void target_widget::im_callback(const visualization_msgs::InteractiveMarkerFeedb
     }
         
     ros::Duration sleep_time(0.05);
-    tf::Transform current_robot_transform;
-    tf::poseMsgToTF(source_pose,current_robot_transform);
-    br.sendTransform(tf::StampedTransform(current_robot_transform, ros::Time::now(), "world", "cylinder"));
     callback_mutex.unlock();
     sleep_time.sleep();
 }
