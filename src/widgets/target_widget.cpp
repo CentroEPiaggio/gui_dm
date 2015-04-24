@@ -187,7 +187,7 @@ target_widget::target_widget(bool setting_source_position_): setting_source_posi
 
 void target_widget::update_mesh_resources()
 {
-    std::string path = "package://dual_manipulation_grasp_db/object_meshes/";
+    std::string path = "package://asus_scanner_models/";
     for(auto item:db_mapper.Objects)
     {
 	std::string db_obj_name(std::get<0>(item.second));
