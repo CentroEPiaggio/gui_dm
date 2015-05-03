@@ -20,6 +20,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include "dual_manipulation_shared/databasemapper.h"
 #include "tf/transform_broadcaster.h"
+#include "dual_manipulation_shared/good_grasp_msg.h"
 
 class target_widget: public QWidget
 {
@@ -39,6 +40,9 @@ private:
   bool setting_source_position;
   QSignalMapper source_signalMapper, target_signalMapper;
   QGridLayout main_layout;
+  ros::Subscriber good_grasp_subscriber;
+  ros::Publisher good_grasp_publisher;
+  void good_grasp_callback(dual_manipulation_shared::good_grasp_msg msg);
 
   QLabel source_label, target_label;
 

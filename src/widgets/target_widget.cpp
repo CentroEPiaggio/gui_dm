@@ -6,12 +6,16 @@
 #include "tf_conversions/tf_kdl.h"
 #include <dual_manipulation_shared/gui_target_response.h>
 #include "tf/transform_listener.h"
+#include "dual_manipulation_shared/grasp_trajectory.h"
+#include "dual_manipulation_shared/serialization_utils.h"
 
 target_widget::target_widget(bool setting_source_position_): setting_source_position(setting_source_position_)
 {
     gui_target_service = n.advertiseService("gui_target_service", &target_widget::gui_target_service_callback, this);
     sub = n.subscribe("/clicked_point",1,&target_widget::clicked_point,this);
     target_pub = n.advertise<dual_manipulation_shared::gui_target_response>( "/gui_target_response", 1000 );
+    good_grasp_subscriber = n.subscribe("/good_grasp_topic",1,&target_widget::good_grasp_callback,this);
+    good_grasp_publisher = n.advertise<visualization_msgs::Marker>( "/good_grasp_marker", 1000 );
 
     int glob_id = 0;
     int row = 0;
@@ -488,6 +492,101 @@ void target_widget::on_set_target_clicked()
 
     target_pub.publish(msg);
 }
+
+void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg msg)
+{
+    dual_manipulation_shared::grasp_trajectory grasp_msg;
+    std::string file_name;
+    visualization_msgs::Marker marker;
+
+    marker.action=3; //delete all
+    marker.header.frame_id = "world";
+    good_grasp_publisher.publish(marker);
+
+    marker.action=visualization_msgs::Marker::ADD;
+    marker.lifetime=ros::DURATION_MAX;
+    marker.type=visualization_msgs::Marker::MESH_RESOURCE;
+    std::string path = "package://soft_hand_description/meshes/palm_right.stl";
+    marker.mesh_resource=path.c_str();
+    marker.scale.x=0.001;
+    marker.scale.y=0.001;
+    marker.scale.z=0.001;
+
+    for(int i=0;i<msg.good_source_grasps.size();i++)
+    {
+        int grasp_id_ = msg.good_source_grasps.at(i);
+        file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_);
+        if(deserialize_ik(grasp_msg,file_name))
+	{
+	    ROS_INFO_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << " OK!");
+	    if(!db_mapper.Objects.count(obj_id_))
+	    {
+		ROS_WARN_STREAM("Object "<<obj_id_<<" is not in the database! . . . Retry!");
+		continue;
+	    }
+	    if(!db_mapper.Grasps.count(grasp_id_))
+	    {
+		ROS_WARN_STREAM("Grasps "<<grasp_id_<<" is not in the database! . . . Retry!");
+		continue;
+	    }
+	    break;
+	}
+	else
+	{
+	    ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
+	    continue;
+	}
+	
+	endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
+	marker.color.a = 1;
+	marker.color.r = (ee_id==1)?0:1;
+	marker.color.g = (ee_id==1)?1:0;
+	marker.color.b = 0;
+	marker.id=i;
+	marker.ns="source";
+	marker.pose=grasp_msg.ee_pose.back();
+	good_grasp_publisher.publish(marker);
+    }
+    
+    for(int i=0;i<msg.good_target_grasps.size();i++)
+    {
+        int grasp_id_ = msg.good_target_grasps.at(i);
+        file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_);
+        if(deserialize_ik(grasp_msg,file_name))
+	{
+	    ROS_INFO_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << " OK!");
+	    if(!db_mapper.Objects.count(obj_id_))
+	    {
+		ROS_WARN_STREAM("Object "<<obj_id_<<" is not in the database! . . . Retry!");
+		continue;
+	    }
+	    if(!db_mapper.Grasps.count(grasp_id_))
+	    {
+		ROS_WARN_STREAM("Grasps "<<grasp_id_<<" is not in the database! . . . Retry!");
+		continue;
+	    }
+	    break;
+	}
+	else
+	{
+	    ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
+	    continue;
+	}
+	
+	endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
+	marker.color.a = 1;
+	marker.color.r = (ee_id==1)?0:1;
+	marker.color.g = (ee_id==1)?1:0;
+	marker.color.b = 0;
+	marker.id=i;
+	marker.ns="target";
+	marker.pose=grasp_msg.ee_pose.back();
+	good_grasp_publisher.publish(marker);
+    }
+
+    ROS_INFO_STREAM("Publishing good grasp markers");
+}
+
 
 target_widget::~target_widget()
 {
