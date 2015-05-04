@@ -9,6 +9,8 @@
 #include "dual_manipulation_shared/grasp_trajectory.h"
 #include "dual_manipulation_shared/serialization_utils.h"
 
+#define OBJ_GRASP_FACTOR 1000
+
 target_widget::target_widget(bool setting_source_position_): setting_source_position(setting_source_position_)
 {
     gui_target_service = n.advertiseService("gui_target_service", &target_widget::gui_target_service_callback, this);
@@ -506,8 +508,8 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
     marker.action=visualization_msgs::Marker::ADD;
     marker.lifetime=ros::DURATION_MAX;
     marker.type=visualization_msgs::Marker::MESH_RESOURCE;
-    std::string path = "package://soft_hand_description/meshes/palm_right.stl";
-    marker.mesh_resource=path.c_str();
+    std::string path_r = "package://soft_hand_description/meshes/palm_right.stl";
+    std::string path_l = "package://soft_hand_description/meshes/palm_left.stl";
     marker.scale.x=0.001;
     marker.scale.y=0.001;
     marker.scale.z=0.001;
@@ -515,10 +517,10 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
     for(int i=0;i<msg.good_source_grasps.size();i++)
     {
         int grasp_id_ = msg.good_source_grasps.at(i);
-        file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_);
+        file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_ % OBJ_GRASP_FACTOR);
         if(deserialize_ik(grasp_msg,file_name))
 	{
-	    ROS_INFO_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << " OK!");
+	    ROS_DEBUG_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << " OK!");
 	    if(!db_mapper.Objects.count(obj_id_))
 	    {
 		ROS_WARN_STREAM("Object "<<obj_id_<<" is not in the database! . . . Retry!");
@@ -526,10 +528,9 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
 	    }
 	    if(!db_mapper.Grasps.count(grasp_id_))
 	    {
-		ROS_WARN_STREAM("Grasps "<<grasp_id_<<" is not in the database! . . . Retry!");
+		ROS_WARN_STREAM("Grasp #"<<grasp_id_<<" is not in the database! . . . Retry!");
 		continue;
 	    }
-	    break;
 	}
 	else
 	{
@@ -538,23 +539,28 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
 	}
 	
 	endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
-	marker.color.a = 1;
-	marker.color.r = (ee_id==1)?0:1;
+	marker.color.a = 0.75;
+	marker.color.b = (ee_id==1)?0:1;
 	marker.color.g = (ee_id==1)?1:0;
-	marker.color.b = 0;
+	marker.color.r = 0;
+	marker.mesh_resource=(ee_id==1)?(path_l.c_str()):(path_r.c_str());
 	marker.id=i;
 	marker.ns="source";
-	marker.pose=grasp_msg.ee_pose.back();
+	KDL::Frame source_hand,world_source;
+	tf::poseMsgToKDL(grasp_msg.ee_pose.back(),source_hand);
+	tf::poseMsgToKDL(source_pose,world_source);
+	tf::poseKDLToMsg(world_source*source_hand,marker.pose);
 	good_grasp_publisher.publish(marker);
+	
     }
     
     for(int i=0;i<msg.good_target_grasps.size();i++)
     {
         int grasp_id_ = msg.good_target_grasps.at(i);
-        file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_);
+        file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_ % OBJ_GRASP_FACTOR);
         if(deserialize_ik(grasp_msg,file_name))
 	{
-	    ROS_INFO_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << " OK!");
+	    ROS_DEBUG_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << " OK!");
 	    if(!db_mapper.Objects.count(obj_id_))
 	    {
 		ROS_WARN_STREAM("Object "<<obj_id_<<" is not in the database! . . . Retry!");
@@ -562,10 +568,9 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
 	    }
 	    if(!db_mapper.Grasps.count(grasp_id_))
 	    {
-		ROS_WARN_STREAM("Grasps "<<grasp_id_<<" is not in the database! . . . Retry!");
+		ROS_WARN_STREAM("Grasp #"<<grasp_id_<<" is not in the database! . . . Retry!");
 		continue;
 	    }
-	    break;
 	}
 	else
 	{
@@ -574,13 +579,17 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
 	}
 	
 	endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
-	marker.color.a = 1;
-	marker.color.r = (ee_id==1)?0:1;
+	marker.color.a = 0.75;
+	marker.color.b = (ee_id==1)?0:1;
 	marker.color.g = (ee_id==1)?1:0;
-	marker.color.b = 0;
+	marker.color.r = 0;
+	marker.mesh_resource=(ee_id==1)?(path_l.c_str()):(path_r.c_str());
 	marker.id=i;
 	marker.ns="target";
-	marker.pose=grasp_msg.ee_pose.back();
+	KDL::Frame target_hand,world_target;
+	tf::poseMsgToKDL(grasp_msg.ee_pose.back(),target_hand);
+	tf::poseMsgToKDL(target_pose,world_target);
+	tf::poseKDLToMsg(world_target*target_hand,marker.pose);
 	good_grasp_publisher.publish(marker);
     }
 
