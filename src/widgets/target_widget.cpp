@@ -593,6 +593,56 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
 	good_grasp_publisher.publish(marker);
     }
 
+    for(int i=0;i<msg.bad_source_grasps.size();i++)
+    {
+        int grasp_id_ = msg.bad_source_grasps.at(i);
+        file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_ % OBJ_GRASP_FACTOR);
+        if(!deserialize_ik(grasp_msg,file_name))
+	{
+	    ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
+	    continue;
+	}
+	
+	endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
+	marker.color.a = 0.1;
+	marker.color.b = (ee_id==1)?0:0.1;
+	marker.color.g = (ee_id==1)?0.1:0;
+	marker.color.r = 1;
+	marker.mesh_resource=(ee_id==1)?(path_l.c_str()):(path_r.c_str());
+	marker.id=i;
+	marker.ns="bad_source";
+	KDL::Frame source_hand,world_source;
+	tf::poseMsgToKDL(grasp_msg.ee_pose.back(),source_hand);
+	tf::poseMsgToKDL(source_pose,world_source);
+	tf::poseKDLToMsg(world_source*source_hand,marker.pose);
+	good_grasp_publisher.publish(marker);
+    }
+    
+    for(int i=0;i<msg.bad_target_grasps.size();i++)
+    {
+        int grasp_id_ = msg.bad_target_grasps.at(i);
+        file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_ % OBJ_GRASP_FACTOR);
+	if(!deserialize_ik(grasp_msg,file_name))
+	{
+	    ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
+	    continue;
+	}
+	
+	endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
+	marker.color.a = 0.1;
+	marker.color.b = (ee_id==1)?0:0.1;
+	marker.color.g = (ee_id==1)?0.1:0;
+	marker.color.r = 1;
+	marker.mesh_resource=(ee_id==1)?(path_l.c_str()):(path_r.c_str());
+	marker.id=i;
+	marker.ns="bad_target";
+	KDL::Frame target_hand,world_target;
+	tf::poseMsgToKDL(grasp_msg.ee_pose.back(),target_hand);
+	tf::poseMsgToKDL(target_pose,world_target);
+	tf::poseKDLToMsg(world_target*target_hand,marker.pose);
+	good_grasp_publisher.publish(marker);
+    }
+
     ROS_INFO_STREAM("Publishing good grasp markers");
 }
 
