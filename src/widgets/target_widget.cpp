@@ -17,7 +17,7 @@ target_widget::target_widget(bool setting_source_position_): setting_source_posi
     sub = n.subscribe("/clicked_point",1,&target_widget::clicked_point,this);
     target_pub = n.advertise<dual_manipulation_shared::gui_target_response>( "/gui_target_response", 1000 );
     good_grasp_subscriber = n.subscribe("/good_grasp_topic",1,&target_widget::good_grasp_callback,this);
-    good_grasp_publisher = n.advertise<visualization_msgs::Marker>( "/good_grasp_marker", 1000 );
+    good_grasp_publisher = n.advertise<visualization_msgs::MarkerArray>( "/good_grasp_marker", 1000, true );
 
     int glob_id = 0;
     int row = 0;
@@ -45,33 +45,33 @@ target_widget::target_widget(bool setting_source_position_): setting_source_posi
     
     for(auto item:coord_vec)
     {
-	QHBoxLayout* temp_layout = new QHBoxLayout();
-	QLabel* label = new QLabel(QString::fromStdString(item));
-	label->setFixedSize(60,30);
-	source_coord_label.push_back(label);
-	QLineEdit* edit = new QLineEdit();
-	edit->setFixedSize(80,30);
+    QHBoxLayout* temp_layout = new QHBoxLayout();
+    QLabel* label = new QLabel(QString::fromStdString(item));
+    label->setFixedSize(60,30);
+    source_coord_label.push_back(label);
+    QLineEdit* edit = new QLineEdit();
+    edit->setFixedSize(80,30);
         QString s("source");
         s.append(QString::number(glob_id));
         double value=0.0;
         value=settings.value(s,value).toDouble();
- 	edit->setText(QString::number(value, 'f', 2));
-	source_coord_map[glob_id] = edit;
-	temp_layout->addWidget(label);
-	temp_layout->addWidget(edit);
-	source_coord_sublayout.push_back(temp_layout);
-	if(!setting_source_position) edit->setEnabled(false);
-	
-	connect (edit, SIGNAL(textChanged(QString)),&source_signalMapper, SLOT(map())) ;
-	source_signalMapper.setMapping(edit, glob_id) ;
-	glob_id++;
+    edit->setText(QString::number(value, 'f', 2));
+    source_coord_map[glob_id] = edit;
+    temp_layout->addWidget(label);
+    temp_layout->addWidget(edit);
+    source_coord_sublayout.push_back(temp_layout);
+    if(!setting_source_position) edit->setEnabled(false);
+    
+    connect (edit, SIGNAL(textChanged(QString)),&source_signalMapper, SLOT(map())) ;
+    source_signalMapper.setMapping(edit, glob_id) ;
+    glob_id++;
 
-	if(glob_id == coord_vec.size()/2+1)
-	{
-	    row=1;
-	    col++;
-	}
-	main_layout.addLayout(temp_layout,row++,col,Qt::AlignCenter);
+    if(glob_id == coord_vec.size()/2+1)
+    {
+        row=1;
+        col++;
+    }
+    main_layout.addLayout(temp_layout,row++,col,Qt::AlignCenter);
     }
   
     connect (&source_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_source_coord_edit_changed(int))) ;    
@@ -82,32 +82,32 @@ target_widget::target_widget(bool setting_source_position_): setting_source_posi
 
     for(auto item:coord_vec)
     {
-	QHBoxLayout* temp_layout = new QHBoxLayout();
-	QLabel* label = new QLabel(QString::fromStdString(item));
-	label->setFixedSize(60,30);
-	target_coord_label.push_back(label);
-	QLineEdit* edit = new QLineEdit();
-	edit->setFixedSize(80,30);
+    QHBoxLayout* temp_layout = new QHBoxLayout();
+    QLabel* label = new QLabel(QString::fromStdString(item));
+    label->setFixedSize(60,30);
+    target_coord_label.push_back(label);
+    QLineEdit* edit = new QLineEdit();
+    edit->setFixedSize(80,30);
         QString s("target");
         s.append(QString::number(glob_id));
         double value=0.0;
         value=settings.value(s,value).toDouble();
         edit->setText(QString::number(value, 'f', 2));
-	target_coord_map[glob_id] = edit;
-	temp_layout->addWidget(label);
-	temp_layout->addWidget(edit);
-	target_coord_sublayout.push_back(temp_layout);
-	
-	connect (edit, SIGNAL(textChanged(QString)),&target_signalMapper, SLOT(map())) ;
-	target_signalMapper.setMapping(edit, glob_id) ;
-	glob_id++;
+    target_coord_map[glob_id] = edit;
+    temp_layout->addWidget(label);
+    temp_layout->addWidget(edit);
+    target_coord_sublayout.push_back(temp_layout);
+    
+    connect (edit, SIGNAL(textChanged(QString)),&target_signalMapper, SLOT(map())) ;
+    target_signalMapper.setMapping(edit, glob_id) ;
+    glob_id++;
 
-	if(glob_id == coord_vec.size()/2+1)
-	{
-	    row=1;
-	    col++;
-	}
-	main_layout.addLayout(temp_layout,row++,col,Qt::AlignCenter);
+    if(glob_id == coord_vec.size()/2+1)
+    {
+        row=1;
+        col++;
+    }
+    main_layout.addLayout(temp_layout,row++,col,Qt::AlignCenter);
     }
 
     connect (&target_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_target_coord_edit_changed(int))) ;
@@ -196,14 +196,14 @@ void target_widget::update_mesh_resources()
     std::string path = "package://asus_scanner_models/";
     for(auto item:db_mapper.Objects)
     {
-	std::string db_obj_name(std::get<0>(item.second));
-	if((!source_id.empty() && source_id.compare(db_obj_name) == 0) || 
-	    (source_id.empty() && (object_selection.currentText().toStdString().compare(0,db_obj_name.length(),db_obj_name) == 0)))
-	{
-	    path.append(std::get<1>(item.second));
-	    obj_id_ = item.first;
-	    break;
-	}
+    std::string db_obj_name(std::get<0>(item.second));
+    if((!source_id.empty() && source_id.compare(db_obj_name) == 0) || 
+        (source_id.empty() && (object_selection.currentText().toStdString().compare(0,db_obj_name.length(),db_obj_name) == 0)))
+    {
+        path.append(std::get<1>(item.second));
+        obj_id_ = item.first;
+        break;
+    }
     }
     
     ROS_DEBUG_STREAM("object path: "<<path<<std::endl);
@@ -231,13 +231,13 @@ void target_widget::im_callback(const visualization_msgs::InteractiveMarkerFeedb
     callback_mutex.lock();
     if(feedback.marker_name=="source")
     {
-	source_pose = feedback.pose;
-	update_coords(source_coord_map,source_pose);
+    source_pose = feedback.pose;
+    update_coords(source_coord_map,source_pose);
     }
     if(feedback.marker_name=="target")
     {
-	target_pose = feedback.pose;
-	update_coords(target_coord_map,target_pose);
+    target_pose = feedback.pose;
+    update_coords(target_coord_map,target_pose);
     }
         
     ros::Duration sleep_time(0.05);
@@ -306,24 +306,24 @@ void target_widget::clicked_point(const geometry_msgs::PointStampedPtr& point)
     callback_mutex.lock();
     if(setting_source_position)
     {
-	if(clicking_pose.currentText().toStdString()=="CLICK: target")
-	{
-	    target_pose.position = point->point;
-	    update_coords(target_coord_map,target_pose);
-	    publish_marker();
-	}
-	if(clicking_pose.currentText().toStdString()=="CLICK: source")
-	{
-	    source_pose.position = point->point;
-	    update_coords(source_coord_map,source_pose);
-	    publish_marker();
-	}
+    if(clicking_pose.currentText().toStdString()=="CLICK: target")
+    {
+        target_pose.position = point->point;
+        update_coords(target_coord_map,target_pose);
+        publish_marker();
+    }
+    if(clicking_pose.currentText().toStdString()=="CLICK: source")
+    {
+        source_pose.position = point->point;
+        update_coords(source_coord_map,source_pose);
+        publish_marker();
+    }
     }
     else
     {
-	target_pose.position = point->point;
-	update_coords(target_coord_map,target_pose);
-	publish_marker();
+    target_pose.position = point->point;
+    update_coords(target_coord_map,target_pose);
+    publish_marker();
     }
     callback_mutex.unlock();
 }
@@ -336,58 +336,58 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
 
     if(!setting_source_position)
     {
-		if(req.source_poses.poses.size()==0)
-		{
-			ROS_ERROR("target_widget::gui_target_service_callback : source_poses is empty!");
-			res.ack = false;
-			return res.ack;
-		}
+        if(req.source_poses.poses.size()==0)
+        {
+            ROS_ERROR("target_widget::gui_target_service_callback : source_poses is empty!");
+            res.ack = false;
+            return res.ack;
+        }
 
-		tf::TransformListener tf_;
-		std::string err_msg;
-		
-		if(!tf_.waitForTransform("/world",req.source_poses.poses.at(0).parent_frame,ros::Time(0),ros::Duration(1),ros::Duration(0.01),&err_msg))
-		{
-			ROS_ERROR("target_widget::gui_target_service_callback : TF ERROR: %s",err_msg.c_str());
-			res.ack = false;
-			return res.ack;
-		}
+        tf::TransformListener tf_;
+        std::string err_msg;
+        
+        if(!tf_.waitForTransform("/world",req.source_poses.poses.at(0).parent_frame,ros::Time(0),ros::Duration(1),ros::Duration(0.01),&err_msg))
+        {
+            ROS_ERROR("target_widget::gui_target_service_callback : TF ERROR: %s",err_msg.c_str());
+            res.ack = false;
+            return res.ack;
+        }
 
-		tf::StampedTransform T;
-		tf_.lookupTransform("/world",req.source_poses.poses.at(0).parent_frame,ros::Time(0),T);
+        tf::StampedTransform T;
+        tf_.lookupTransform("/world",req.source_poses.poses.at(0).parent_frame,ros::Time(0),T);
 
-		KDL::Frame Camera_Object, World_Object, World_Camera;
-		tf::transformTFToKDL(T,World_Camera);
-		geometry_msgs::Pose object_pose;
+        KDL::Frame Camera_Object, World_Object, World_Camera;
+        tf::transformTFToKDL(T,World_Camera);
+        geometry_msgs::Pose object_pose;
 
         source_poses.clear();
-	source_ids.clear();
-	object_selection.clear();
+    source_ids.clear();
+    object_selection.clear();
         int i=0;
-		for(auto pose:req.source_poses.poses)
-		{
-			tf::poseMsgToKDL(pose.pose,Camera_Object);
-			World_Object = World_Camera*Camera_Object;
-			tf::poseKDLToMsg(World_Object,object_pose);
+        for(auto pose:req.source_poses.poses)
+        {
+            tf::poseMsgToKDL(pose.pose,Camera_Object);
+            World_Object = World_Camera*Camera_Object;
+            tf::poseKDLToMsg(World_Object,object_pose);
 
-			source_poses.push_back(object_pose);
-			source_ids.push_back(pose.id);
-			object_selection.addItem(QString::fromStdString(pose.name));
-		}
+            source_poses.push_back(object_pose);
+            source_ids.push_back(pose.id);
+            object_selection.addItem(QString::fromStdString(pose.name));
+        }
 
-		object_selection.setCurrentIndex(0);
-		on_object_changed();
+        object_selection.setCurrentIndex(0);
+        on_object_changed();
 
-		source_coord_map.at(0)->setText(QString::number(source_pose.position.x, 'f', 2));
-		source_coord_map.at(1)->setText(QString::number(source_pose.position.y, 'f', 2));
-		source_coord_map.at(2)->setText(QString::number(source_pose.position.z, 'f', 2));
-		double roll,pitch,yaw;
-		tf::Quaternion q;
-		tf::quaternionMsgToTF(source_pose.orientation,q);
-		tf::Matrix3x3(q).getRPY(roll,pitch,yaw);
-		source_coord_map.at(3)->setText(QString::number(roll, 'f', 2));
-		source_coord_map.at(4)->setText(QString::number(pitch, 'f', 2));
-		source_coord_map.at(5)->setText(QString::number(yaw, 'f', 2));
+        source_coord_map.at(0)->setText(QString::number(source_pose.position.x, 'f', 2));
+        source_coord_map.at(1)->setText(QString::number(source_pose.position.y, 'f', 2));
+        source_coord_map.at(2)->setText(QString::number(source_pose.position.z, 'f', 2));
+        double roll,pitch,yaw;
+        tf::Quaternion q;
+        tf::quaternionMsgToTF(source_pose.orientation,q);
+        tf::Matrix3x3(q).getRPY(roll,pitch,yaw);
+        source_coord_map.at(3)->setText(QString::number(roll, 'f', 2));
+        source_coord_map.at(4)->setText(QString::number(pitch, 'f', 2));
+        source_coord_map.at(5)->setText(QString::number(yaw, 'f', 2));
     }
 
     return res.ack;
@@ -404,16 +404,16 @@ void target_widget::on_source_coord_edit_changed(const int& id)
     
     if(id>2)
     {
-	double ro,pi,ya;
-	tf::Quaternion q;
-	tf::quaternionMsgToTF(source_pose.orientation,q);
-	tf::Matrix3x3(q).getRPY(ro,pi,ya);
+    double ro,pi,ya;
+    tf::Quaternion q;
+    tf::quaternionMsgToTF(source_pose.orientation,q);
+    tf::Matrix3x3(q).getRPY(ro,pi,ya);
       
-	if(id==3) q.setRPY(source_coord_map.at(id)->text().toDouble(),pi,ya);
-	if(id==4) q.setRPY(ro,source_coord_map.at(id)->text().toDouble(),ya);
-	if(id==5) q.setRPY(ro,pi,source_coord_map.at(id)->text().toDouble());
-	
-	tf::quaternionTFToMsg(q,source_pose.orientation);
+    if(id==3) q.setRPY(source_coord_map.at(id)->text().toDouble(),pi,ya);
+    if(id==4) q.setRPY(ro,source_coord_map.at(id)->text().toDouble(),ya);
+    if(id==5) q.setRPY(ro,pi,source_coord_map.at(id)->text().toDouble());
+    
+    tf::quaternionTFToMsg(q,source_pose.orientation);
     }
 
     publish_marker();
@@ -431,16 +431,16 @@ void target_widget::on_target_coord_edit_changed(const int& id)
     
     if(id>2)
     {
-	double ro,pi,ya;
-	tf::Quaternion q;
-	tf::quaternionMsgToTF(target_pose.orientation,q);
-	tf::Matrix3x3(q).getRPY(ro,pi,ya);
+    double ro,pi,ya;
+    tf::Quaternion q;
+    tf::quaternionMsgToTF(target_pose.orientation,q);
+    tf::Matrix3x3(q).getRPY(ro,pi,ya);
       
-	if(id==3) q.setRPY(target_coord_map.at(id)->text().toDouble(),pi,ya);
-	if(id==4) q.setRPY(ro,target_coord_map.at(id)->text().toDouble(),ya);
-	if(id==5) q.setRPY(ro,pi,target_coord_map.at(id)->text().toDouble());
-	
-	tf::quaternionTFToMsg(q,target_pose.orientation);
+    if(id==3) q.setRPY(target_coord_map.at(id)->text().toDouble(),pi,ya);
+    if(id==4) q.setRPY(ro,target_coord_map.at(id)->text().toDouble(),ya);
+    if(id==5) q.setRPY(ro,pi,target_coord_map.at(id)->text().toDouble());
+    
+    tf::quaternionTFToMsg(q,target_pose.orientation);
     }
 
     publish_marker();
@@ -507,10 +507,13 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
     dual_manipulation_shared::grasp_trajectory grasp_msg;
     std::string file_name;
     visualization_msgs::Marker marker;
+    visualization_msgs::Marker text_marker;
+    visualization_msgs::MarkerArray markers;
 
     marker.action=3; //delete all
     marker.header.frame_id = "world";
-    good_grasp_publisher.publish(marker);
+    markers.markers.push_back(marker);
+    //good_grasp_publisher.publish(marker);
 
     marker.action=visualization_msgs::Marker::ADD;
     marker.lifetime=ros::DURATION_MAX;
@@ -521,83 +524,111 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
     marker.scale.y=0.001;
     marker.scale.z=0.001;
 
-    for(int i=0;i<msg.good_source_grasps.size();i++)
+    text_marker.header = marker.header;
+    text_marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    text_marker.action = visualization_msgs::Marker::ADD;
+    text_marker.color.r = 1.0f;
+    text_marker.color.g = 1.0f;
+    text_marker.color.b = 1.0f;
+    text_marker.color.a = 1.0;
+    text_marker.scale.z = 0.1;
+
+    for(int i=0; i < msg.good_source_grasps.size(); i++)
     {
         int grasp_id_ = msg.good_source_grasps.at(i);
         file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_ % OBJ_GRASP_FACTOR);
         if(deserialize_ik(grasp_msg,file_name))
-	{
-	    ROS_DEBUG_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << " OK!");
-	    if(!db_mapper.Objects.count(obj_id_))
-	    {
-		ROS_WARN_STREAM("Object "<<obj_id_<<" is not in the database! . . . Retry!");
-		continue;
-	    }
-	    if(!db_mapper.Grasps.count(grasp_id_))
-	    {
-		ROS_WARN_STREAM("Grasp #"<<grasp_id_<<" is not in the database! . . . Retry!");
-		continue;
-	    }
-	}
-	else
-	{
-	    ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
-	    continue;
-	}
-	
-	endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
-	marker.color.a = 0.75;
-	marker.color.b = (ee_id==1)?0:1;
-	marker.color.g = (ee_id==1)?1:0;
-	marker.color.r = 0;
-	marker.mesh_resource=(ee_id==1)?(path_l.c_str()):(path_r.c_str());
-	marker.id=i;
-	marker.ns="source";
-	KDL::Frame source_hand,world_source;
-	tf::poseMsgToKDL(grasp_msg.ee_pose.back(),source_hand);
-	tf::poseMsgToKDL(source_pose,world_source);
-	tf::poseKDLToMsg(world_source*source_hand,marker.pose);
-	good_grasp_publisher.publish(marker);
-	
+        {
+            ROS_DEBUG_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << " OK!");
+            if(!db_mapper.Objects.count(obj_id_))
+            {
+                ROS_WARN_STREAM("Object "<<obj_id_<<" is not in the database! . . . Retry!");
+                continue;
+            }
+            if(!db_mapper.Grasps.count(grasp_id_))
+            {
+                ROS_WARN_STREAM("Grasp #"<<grasp_id_<<" is not in the database! . . . Retry!");
+                continue;
+            }
+        }
+        else
+        {
+            ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
+            continue;
+        }
+    
+        endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
+        marker.color.a = 0.75;
+        marker.color.b = (ee_id==1)?0:1;
+        marker.color.g = (ee_id==1)?1:0;
+        marker.color.r = 0;
+        marker.mesh_resource=(ee_id==1)?(path_l.c_str()):(path_r.c_str());
+        marker.id = grasp_id_;
+        marker.ns="source";
+        KDL::Frame source_hand,world_source;
+        tf::poseMsgToKDL(grasp_msg.ee_pose.back(),source_hand);
+        tf::poseMsgToKDL(source_pose,world_source);
+        tf::poseKDLToMsg(world_source*source_hand,marker.pose);
+
+        text_marker.text = std::to_string(marker.id);
+        text_marker.id = marker.id;
+        text_marker.ns = "source/text";
+        text_marker.pose.position = marker.pose.position;
+        text_marker.color = marker.color;
+        text_marker.color.a = 1.0;
+
+        markers.markers.push_back(text_marker);
+        markers.markers.push_back(marker);
+        //good_grasp_publisher.publish(marker);
     }
     
-    for(int i=0;i<msg.good_target_grasps.size();i++)
+    for(int i=0; i<msg.good_target_grasps.size(); i++)
     {
         int grasp_id_ = msg.good_target_grasps.at(i);
         file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_ % OBJ_GRASP_FACTOR);
         if(deserialize_ik(grasp_msg,file_name))
-	{
-	    ROS_DEBUG_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << " OK!");
-	    if(!db_mapper.Objects.count(obj_id_))
-	    {
-		ROS_WARN_STREAM("Object "<<obj_id_<<" is not in the database! . . . Retry!");
-		continue;
-	    }
-	    if(!db_mapper.Grasps.count(grasp_id_))
-	    {
-		ROS_WARN_STREAM("Grasp #"<<grasp_id_<<" is not in the database! . . . Retry!");
-		continue;
-	    }
-	}
-	else
-	{
-	    ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
-	    continue;
-	}
-	
-	endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
-	marker.color.a = 0.75;
-	marker.color.b = (ee_id==1)?0:1;
-	marker.color.g = (ee_id==1)?1:0;
-	marker.color.r = 0;
-	marker.mesh_resource=(ee_id==1)?(path_l.c_str()):(path_r.c_str());
-	marker.id=i;
-	marker.ns="target";
-	KDL::Frame target_hand,world_target;
-	tf::poseMsgToKDL(grasp_msg.ee_pose.back(),target_hand);
-	tf::poseMsgToKDL(target_pose,world_target);
-	tf::poseKDLToMsg(world_target*target_hand,marker.pose);
-	good_grasp_publisher.publish(marker);
+        {
+            ROS_DEBUG_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << " OK!");
+            if(!db_mapper.Objects.count(obj_id_))
+            {
+                ROS_WARN_STREAM("Object "<<obj_id_<<" is not in the database! . . . Retry!");
+                continue;
+            }
+            if(!db_mapper.Grasps.count(grasp_id_))
+            {
+                ROS_WARN_STREAM("Grasp #"<<grasp_id_<<" is not in the database! . . . Retry!");
+                continue;
+            }
+        }
+        else
+        {
+            ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
+            continue;
+        }
+    
+        endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
+        marker.color.a = 0.75;
+        marker.color.b = (ee_id==1)?0:1;
+        marker.color.g = (ee_id==1)?1:0;
+        marker.color.r = 0;
+        marker.mesh_resource=(ee_id==1)?(path_l.c_str()):(path_r.c_str());
+        marker.id=grasp_id_;
+        marker.ns="target";
+        KDL::Frame target_hand,world_target;
+        tf::poseMsgToKDL(grasp_msg.ee_pose.back(),target_hand);
+        tf::poseMsgToKDL(target_pose,world_target);
+        tf::poseKDLToMsg(world_target*target_hand,marker.pose);
+
+        text_marker.text = std::to_string(marker.id);
+        text_marker.id = marker.id;
+        text_marker.ns = "target/text";
+        text_marker.pose.position = marker.pose.position;
+        text_marker.color = marker.color;
+        text_marker.color.a = 1.0;
+
+        markers.markers.push_back(text_marker);
+        markers.markers.push_back(marker);
+        //good_grasp_publisher.publish(marker);
     }
 
     for(int i=0;i<msg.bad_source_grasps.size();i++)
@@ -605,52 +636,73 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         int grasp_id_ = msg.bad_source_grasps.at(i);
         file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_ % OBJ_GRASP_FACTOR);
         if(!deserialize_ik(grasp_msg,file_name))
-	{
-	    ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
-	    continue;
-	}
-	
-	endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
-	marker.color.a = 0.1;
-	marker.color.b = (ee_id==1)?0:0.1;
-	marker.color.g = (ee_id==1)?0.1:0;
-	marker.color.r = 1;
-	marker.mesh_resource=(ee_id==1)?(path_l.c_str()):(path_r.c_str());
-	marker.id=i;
-	marker.ns="bad_source";
-	KDL::Frame source_hand,world_source;
-	tf::poseMsgToKDL(grasp_msg.ee_pose.back(),source_hand);
-	tf::poseMsgToKDL(source_pose,world_source);
-	tf::poseKDLToMsg(world_source*source_hand,marker.pose);
-	good_grasp_publisher.publish(marker);
+        {
+            ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
+            continue;
+        }
+    
+        endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
+        marker.color.a = 0.1;
+        marker.color.b = (ee_id==1)?0:0.1;
+        marker.color.g = (ee_id==1)?0.1:0;
+        marker.color.r = 1;
+        marker.mesh_resource=(ee_id==1)?(path_l.c_str()):(path_r.c_str());
+        marker.id = grasp_id_;
+        marker.ns="bad_source";
+        KDL::Frame source_hand,world_source;
+        tf::poseMsgToKDL(grasp_msg.ee_pose.back(),source_hand);
+        tf::poseMsgToKDL(source_pose,world_source);
+        tf::poseKDLToMsg(world_source*source_hand,marker.pose);
+
+        text_marker.text = std::to_string(marker.id);
+        text_marker.id = marker.id;
+        text_marker.ns = "bad_source/text";
+        text_marker.pose.position = marker.pose.position;
+        text_marker.color = marker.color;
+        text_marker.color.a = 1.0;
+
+        markers.markers.push_back(text_marker);
+        markers.markers.push_back(marker);
+        //good_grasp_publisher.publish(marker);
     }
     
     for(int i=0;i<msg.bad_target_grasps.size();i++)
     {
         int grasp_id_ = msg.bad_target_grasps.at(i);
         file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_ % OBJ_GRASP_FACTOR);
-	if(!deserialize_ik(grasp_msg,file_name))
-	{
-	    ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
-	    continue;
-	}
-	
-	endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
-	marker.color.a = 0.1;
-	marker.color.b = (ee_id==1)?0:0.1;
-	marker.color.g = (ee_id==1)?0.1:0;
-	marker.color.r = 1;
-	marker.mesh_resource=(ee_id==1)?(path_l.c_str()):(path_r.c_str());
-	marker.id=i;
-	marker.ns="bad_target";
-	KDL::Frame target_hand,world_target;
-	tf::poseMsgToKDL(grasp_msg.ee_pose.back(),target_hand);
-	tf::poseMsgToKDL(target_pose,world_target);
-	tf::poseKDLToMsg(world_target*target_hand,marker.pose);
-	good_grasp_publisher.publish(marker);
+        if(!deserialize_ik(grasp_msg,file_name))
+        {
+            ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
+            continue;
+        }
+    
+        endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
+        marker.color.a = 0.1;
+        marker.color.b = (ee_id==1)?0:0.1;
+        marker.color.g = (ee_id==1)?0.1:0;
+        marker.color.r = 1;
+        marker.mesh_resource=(ee_id==1)?(path_l.c_str()):(path_r.c_str());
+        marker.id = grasp_id_;
+        marker.ns="bad_target";
+        KDL::Frame target_hand,world_target;
+        tf::poseMsgToKDL(grasp_msg.ee_pose.back(),target_hand);
+        tf::poseMsgToKDL(target_pose,world_target);
+        tf::poseKDLToMsg(world_target*target_hand,marker.pose);
+
+        text_marker.text = std::to_string(marker.id);
+        text_marker.id = marker.id;
+        text_marker.ns = "bad_target/text";
+        text_marker.pose.position = marker.pose.position;
+        text_marker.color = marker.color;
+        text_marker.color.a = 1.0;
+
+        markers.markers.push_back(text_marker);
+        markers.markers.push_back(marker);
+        // good_grasp_publisher.publish(marker);
     }
 
     ROS_INFO_STREAM("Publishing good grasp markers");
+    good_grasp_publisher.publish(markers);
 }
 
 
@@ -668,11 +720,11 @@ target_widget::~target_widget()
 
     for(auto item:source_coord_sublayout)
     {
-	delete item;
+    delete item;
     }
 
     for(auto item:target_coord_sublayout)
     {
-	delete item;
+    delete item;
     }
 }
