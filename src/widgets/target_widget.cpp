@@ -570,7 +570,7 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         tf::poseMsgToKDL(source_pose,world_source);
         tf::poseKDLToMsg(world_source*source_hand,marker.pose);
 
-        text_marker.text = std::to_string(marker.id);
+        text_marker.text = std::string( "(" ) + std::to_string( marker.id ) + std::string( "," ) + std::to_string( ee_id ) + std::string ( ")" );
         text_marker.id = marker.id;
         text_marker.ns = "source/text";
         text_marker.pose.position = marker.pose.position;
@@ -619,7 +619,7 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         tf::poseMsgToKDL(target_pose,world_target);
         tf::poseKDLToMsg(world_target*target_hand,marker.pose);
 
-        text_marker.text = std::to_string(marker.id);
+        text_marker.text = std::string( "(" ) + std::to_string( marker.id ) + std::string( "," ) + std::to_string( ee_id ) + std::string ( ")" );
         text_marker.id = marker.id;
         text_marker.ns = "target/text";
         text_marker.pose.position = marker.pose.position;
@@ -654,7 +654,7 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         tf::poseMsgToKDL(source_pose,world_source);
         tf::poseKDLToMsg(world_source*source_hand,marker.pose);
 
-        text_marker.text = std::to_string(marker.id);
+        text_marker.text = std::string( "(" ) + std::to_string( marker.id ) + std::string( "," ) + std::to_string( ee_id ) + std::string ( ")" );
         text_marker.id = marker.id;
         text_marker.ns = "bad_source/text";
         text_marker.pose.position = marker.pose.position;
@@ -689,7 +689,7 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         tf::poseMsgToKDL(target_pose,world_target);
         tf::poseKDLToMsg(world_target*target_hand,marker.pose);
 
-        text_marker.text = std::to_string(marker.id);
+        text_marker.text = std::string( "(" ) + std::to_string( marker.id ) + std::string( "," ) + std::to_string( ee_id ) + std::string ( ")" );
         text_marker.id = marker.id;
         text_marker.ns = "bad_target/text";
         text_marker.pose.position = marker.pose.position;
