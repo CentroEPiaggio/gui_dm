@@ -60,6 +60,7 @@ private:
   QPushButton publish_button;
   QPushButton set_target_button;
   geometry_msgs::Pose source_pose, target_pose;
+  std::string source_id;
   ros::NodeHandle n;
 
   ros::ServiceServer gui_target_service;
@@ -82,6 +83,7 @@ private:
   tf::TransformBroadcaster br;
 
   std::vector<geometry_msgs::Pose> source_poses;
+  std::vector<std::string> source_ids;
   ros::Publisher target_pub;
 };
 

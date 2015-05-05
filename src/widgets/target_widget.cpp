@@ -197,7 +197,8 @@ void target_widget::update_mesh_resources()
     for(auto item:db_mapper.Objects)
     {
 	std::string db_obj_name(std::get<0>(item.second));
-	if(object_selection.currentText().toStdString().compare(0,db_obj_name.length(),db_obj_name) == 0)
+	if((!source_id.empty() && source_id.compare(db_obj_name) == 0) || 
+	    (source_id.empty() && (object_selection.currentText().toStdString().compare(0,db_obj_name.length(),db_obj_name) == 0)))
 	{
 	    path.append(std::get<1>(item.second));
 	    obj_id_ = item.first;
@@ -216,7 +217,11 @@ void target_widget::update_mesh_resources()
 
 void target_widget::on_object_changed()
 {
-    if(source_poses.size()>object_selection.currentIndex()) source_pose = source_poses.at(object_selection.currentIndex());
+    if(source_poses.size()>object_selection.currentIndex())
+    {
+      source_pose = source_poses.at(object_selection.currentIndex());
+      source_id = source_ids.at(object_selection.currentIndex());
+    }
     update_mesh_resources();
     publish_marker();
 }
@@ -356,6 +361,7 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
 		geometry_msgs::Pose object_pose;
 
         source_poses.clear();
+	source_ids.clear();
 	object_selection.clear();
         int i=0;
 		for(auto pose:req.source_poses.poses)
@@ -365,6 +371,7 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
 			tf::poseKDLToMsg(World_Object,object_pose);
 
 			source_poses.push_back(object_pose);
+			source_ids.push_back(pose.id);
 			object_selection.addItem(QString::fromStdString(pose.name));
 		}
 
