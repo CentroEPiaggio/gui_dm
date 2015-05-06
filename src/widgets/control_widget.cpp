@@ -70,11 +70,11 @@ void control_widget::on_home_robot_button_clicked()
 
     if (ik_client.call(ik_srv))
     {
-	ROS_INFO_STREAM("IK Control Request accepted: (" << (int)srv.response.ack << ")");
+	ROS_INFO_STREAM("IK Control Request \'" << ik_srv.request.command << "\' accepted: (" << (int)srv.response.ack << ")");
     }
     else
     {
-	ROS_ERROR("Failed to call service dual_manipulation_shared::ik_service");
+	ROS_ERROR("Failed to call service dual_manipulation_shared::ik_service \'" << ik_srv.request.command << "\'");
     }
 }
 
@@ -87,11 +87,23 @@ void control_widget::on_stop_robot_button_clicked()
 
     if (ik_client.call(ik_srv))
     {
-	ROS_INFO_STREAM("IK Control Request accepted: (" << (int)srv.response.ack << ")");
+	ROS_INFO_STREAM("IK Control Request \'" << ik_srv.request.command << "\' accepted: (" << (int)srv.response.ack << ")");
     }
     else
     {
-	ROS_ERROR("Failed to call service dual_manipulation_shared::ik_service");
+	ROS_ERROR("Failed to call service dual_manipulation_shared::ik_service \'" << ik_srv.request.command << "\'");
+    }
+    
+    srv.request.command = "abort_move";
+    srv.request.time = 0;
+
+    if (client.call(srv))
+    {
+	ROS_INFO_STREAM("State Manager Request \'" << srv.request.command << "\' accepted: (" << (int)srv.response.ack << ")");
+    }
+    else
+    {
+	ROS_ERROR("Failed to call service dual_manipulation_shared::state_manager_service \'" << srv.request.command << "\'");
     }
 }
 
@@ -104,11 +116,11 @@ void control_widget::on_command_button_clicked(const int& id)
 
     if (client.call(srv))
     {
-	ROS_INFO_STREAM("State Manager Request accepted: (" << (int)srv.response.ack << ")");
+	ROS_INFO_STREAM("State Manager Request \'" << srv.request.command << "\' accepted: (" << (int)srv.response.ack << ")");
     }
     else
     {
-	ROS_ERROR("Failed to call service dual_manipulation_shared::state_manager_service");
+	ROS_ERROR("Failed to call service dual_manipulation_shared::state_manager_service \'" << srv.request.command << "\'");
     }
 
     if(map_button.at(id)->text().toStdString() == "get_info") smw->start_timer();
