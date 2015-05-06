@@ -74,7 +74,7 @@ void control_widget::on_home_robot_button_clicked()
     }
     else
     {
-	ROS_ERROR("Failed to call service dual_manipulation_shared::ik_service \'" << ik_srv.request.command << "\'");
+	ROS_ERROR_STREAM("Failed to call service dual_manipulation_shared::ik_service \'" << ik_srv.request.command << "\'");
     }
 }
 
@@ -91,7 +91,7 @@ void control_widget::on_stop_robot_button_clicked()
     }
     else
     {
-	ROS_ERROR("Failed to call service dual_manipulation_shared::ik_service \'" << ik_srv.request.command << "\'");
+	ROS_ERROR_STREAM("Failed to call service dual_manipulation_shared::ik_service \'" << ik_srv.request.command << "\'");
     }
     
     srv.request.command = "abort_move";
@@ -103,7 +103,7 @@ void control_widget::on_stop_robot_button_clicked()
     }
     else
     {
-	ROS_ERROR("Failed to call service dual_manipulation_shared::state_manager_service \'" << srv.request.command << "\'");
+	ROS_ERROR_STREAM("Failed to call service dual_manipulation_shared::state_manager_service \'" << srv.request.command << "\'");
     }
 }
 
@@ -120,7 +120,7 @@ void control_widget::on_command_button_clicked(const int& id)
     }
     else
     {
-	ROS_ERROR("Failed to call service dual_manipulation_shared::state_manager_service \'" << srv.request.command << "\'");
+	ROS_ERROR_STREAM("Failed to call service dual_manipulation_shared::state_manager_service \'" << srv.request.command << "\'");
     }
 
     if(map_button.at(id)->text().toStdString() == "get_info") smw->start_timer();
