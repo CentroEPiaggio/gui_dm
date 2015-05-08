@@ -615,7 +615,8 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         marker.id=grasp_id_;
         marker.ns="target";
         KDL::Frame target_hand,world_target;
-        tf::poseMsgToKDL(grasp_msg.ee_pose.back(),target_hand);
+        tf::poseMsgToKDL(grasp_msg.attObject.object.mesh_poses.front(),target_hand);
+        target_hand = target_hand.Inverse();
         tf::poseMsgToKDL(target_pose,world_target);
         tf::poseKDLToMsg(world_target*target_hand,marker.pose);
 
@@ -685,7 +686,8 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         marker.id = grasp_id_;
         marker.ns="bad_target";
         KDL::Frame target_hand,world_target;
-        tf::poseMsgToKDL(grasp_msg.ee_pose.back(),target_hand);
+        tf::poseMsgToKDL(grasp_msg.attObject.object.mesh_poses.front(),target_hand);
+        target_hand = target_hand.Inverse();
         tf::poseMsgToKDL(target_pose,world_target);
         tf::poseKDLToMsg(world_target*target_hand,marker.pose);
 
