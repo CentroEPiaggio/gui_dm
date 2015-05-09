@@ -346,7 +346,7 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
         tf::TransformListener tf_;
         std::string err_msg;
         
-        if(!tf_.waitForTransform("/world",req.source_poses.poses.at(0).parent_frame,ros::Time(0),ros::Duration(1),ros::Duration(0.01),&err_msg))
+        if(!tf_.waitForTransform("/world",req.source_poses.poses.at(0).parent_frame,ros::Time(0),ros::Duration(3),ros::Duration(0.01),&err_msg))
         {
             ROS_ERROR("target_widget::gui_target_service_callback : TF ERROR: %s",err_msg.c_str());
             res.ack = false;
