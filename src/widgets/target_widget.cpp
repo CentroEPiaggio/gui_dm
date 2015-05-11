@@ -10,6 +10,7 @@
 #include "dual_manipulation_shared/serialization_utils.h"
 
 #define OBJ_GRASP_FACTOR 1000
+#define DEBUG 0
 
 target_widget::target_widget(bool setting_source_position_): setting_source_position(setting_source_position_)
 {
@@ -570,14 +571,16 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         tf::poseMsgToKDL(source_pose,world_source);
         tf::poseKDLToMsg(world_source*source_hand,marker.pose);
 
+#if DEBUG>0
         text_marker.text = std::string( "(" ) + std::to_string( marker.id ) + std::string( "," ) + std::to_string( ee_id ) + std::string ( ")" );
         text_marker.id = marker.id;
         text_marker.ns = "source/text";
         text_marker.pose.position = marker.pose.position;
         text_marker.color = marker.color;
         text_marker.color.a = 1.0;
-
         markers.markers.push_back(text_marker);
+#endif
+
         markers.markers.push_back(marker);
         //good_grasp_publisher.publish(marker);
     }
@@ -620,18 +623,21 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         tf::poseMsgToKDL(target_pose,world_target);
         tf::poseKDLToMsg(world_target*target_hand,marker.pose);
 
+#if DEBUG>0
         text_marker.text = std::string( "(" ) + std::to_string( marker.id ) + std::string( "," ) + std::to_string( ee_id ) + std::string ( ")" );
         text_marker.id = marker.id;
         text_marker.ns = "target/text";
         text_marker.pose.position = marker.pose.position;
         text_marker.color = marker.color;
         text_marker.color.a = 1.0;
-
         markers.markers.push_back(text_marker);
+#endif
+
         markers.markers.push_back(marker);
         //good_grasp_publisher.publish(marker);
     }
 
+#if DEBUG>0
     for(int i=0;i<msg.bad_source_grasps.size();i++)
     {
         int grasp_id_ = msg.bad_source_grasps.at(i);
@@ -702,6 +708,7 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         markers.markers.push_back(marker);
         // good_grasp_publisher.publish(marker);
     }
+#endif
 
     ROS_INFO_STREAM("Publishing good grasp markers");
     good_grasp_publisher.publish(markers);
