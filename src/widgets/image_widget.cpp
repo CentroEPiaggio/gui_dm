@@ -157,7 +157,7 @@ void Viewer::paintEvent ( QPaintEvent *event )
         Scene->addLine(graph_msg.x[id_to_position[graph_msg.source[i]]]*2, graph_msg.y[id_to_position[graph_msg.source[i]]]*2, 
                        graph_msg.x[id_to_position[graph_msg.target[i]]]*2, graph_msg.y[id_to_position[graph_msg.target[i]]]*2,temp );
     }
-    pen_red.setWidth(5);
+    pen_red.setWidth(15);
     for ( int i=1;i<graph_msg.path_node_ids.size(); i++ )
     {
         Scene->addLine(graph_msg.x[id_to_position[graph_msg.path_node_ids[i-1]]]*2, graph_msg.y[id_to_position[graph_msg.path_node_ids[i-1]]]*2, 

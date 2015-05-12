@@ -28,6 +28,10 @@ qt4_wrap_cpp(GUI_MOC_FILES
   include/dual_manipulation_gui.h
 )
 
+qt4_wrap_cpp(VISUALIZATION_GUI_MOC_FILES
+  include/dual_manipulation_visualization_gui.h
+)
+
 qt4_wrap_cpp(WIDGETS_MOC_FILES
   include/widgets/render_3d_widget.h
   include/widgets/camera_widget.h
@@ -56,8 +60,21 @@ set(SOURCE_FILES
   ${WIDGET_SOURCE_FILES}
 )
 
+set(VISUALIZATION_SOURCE_FILES
+  src/dual_manipulation_visualization_gui.cpp
+  src/main_visualization.cpp
+  ${VISUALIZATION_GUI_MOC_FILES}
+  ${WIDGETS_MOC_FILES}
+  ${WIDGET_SOURCE_FILES}
+)
+
 add_executable(dual_manipulation_gui ${SOURCE_FILES})
 
 target_link_libraries(dual_manipulation_gui ${QT_LIBRARIES} ${catkin_LIBRARIES})
 
 add_dependencies(dual_manipulation_gui dual_manipulation_shared_gencpp)
+
+
+add_executable(visualization_gui ${VISUALIZATION_SOURCE_FILES})
+target_link_libraries(visualization_gui ${QT_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(visualization_gui dual_manipulation_shared_gencpp)
