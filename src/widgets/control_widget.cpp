@@ -1,6 +1,7 @@
 #include "widgets/control_widget.h"
 #include "ros/ros.h"
 #include "ros/package.h"
+#include <std_msgs/String.h>
 
 control_widget::control_widget(state_machine_widget* smw_):smw(smw_)
 {
@@ -43,6 +44,9 @@ control_widget::control_widget(state_machine_widget* smw_):smw(smw_)
     stop_robot_button.setFixedSize(45,45);
     stop_robot_button.setIcon(QIcon(path_to_package + "/stop.png"));
     stop_robot_button.setIconSize( QSize(stop_robot_button.size().width(), stop_robot_button.size().height() ));
+	
+	left_arm_stop = n.advertise<std_msgs::String>("/left_arm/emergency_stop",10);
+	right_arm_stop = n.advertise<std_msgs::String>("/right_arm/emergency_stop",10);
 
     connect(&stop_robot_button,SIGNAL(clicked(bool)), this, SLOT(on_stop_robot_button_clicked()));
 
@@ -82,6 +86,11 @@ void control_widget::on_home_robot_button_clicked()
 void control_widget::on_stop_robot_button_clicked()
 {
     ROS_DEBUG_STREAM("command STOP to ik_control");
+	
+	std_msgs::String msg;
+	msg.data = "stop";
+	left_arm_stop.publish(msg);
+	right_arm_stop.publish(msg);
 
     ik_srv.request.command = "stop";
 

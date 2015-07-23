@@ -30,6 +30,8 @@ private:
 
   QPushButton home_robot_button;
   QPushButton stop_robot_button;
+  
+  ros::Publisher left_arm_stop,right_arm_stop;
 
   std::map<int,QPushButton*> map_button;
 
