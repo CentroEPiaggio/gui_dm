@@ -22,6 +22,7 @@ public:
 private Q_SLOTS:
   void on_command_button_clicked(const int& id);
   void on_stop_robot_button_clicked();
+  void on_start_robot_button_clicked();
   void on_home_robot_button_clicked();
 
 private:
@@ -29,6 +30,7 @@ private:
   QGridLayout main_layout;
 
   QPushButton home_robot_button;
+  QPushButton start_robot_button;
   QPushButton stop_robot_button;
   
   ros::Publisher left_arm_stop,right_arm_stop;

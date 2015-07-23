@@ -44,11 +44,16 @@ control_widget::control_widget(state_machine_widget* smw_):smw(smw_)
     stop_robot_button.setFixedSize(45,45);
     stop_robot_button.setIcon(QIcon(path_to_package + "/stop.png"));
     stop_robot_button.setIconSize( QSize(stop_robot_button.size().width(), stop_robot_button.size().height() ));
+
+    start_robot_button.setFixedSize(45,45);
+    start_robot_button.setIcon(QIcon(path_to_package + "/start.png"));
+    start_robot_button.setIconSize( QSize(start_robot_button.size().width(), start_robot_button.size().height() ));
 	
 	left_arm_stop = n.advertise<std_msgs::String>("/left_arm/emergency_stop",10);
 	right_arm_stop = n.advertise<std_msgs::String>("/right_arm/emergency_stop",10);
 
     connect(&stop_robot_button,SIGNAL(clicked(bool)), this, SLOT(on_stop_robot_button_clicked()));
+    connect(&start_robot_button,SIGNAL(clicked(bool)), this, SLOT(on_start_robot_button_clicked()));
 
     home_robot_button.setFixedSize(45,45);
     home_robot_button.setIcon(QIcon(path_to_package + "/home.png"));
@@ -57,6 +62,7 @@ control_widget::control_widget(state_machine_widget* smw_):smw(smw_)
     connect(&home_robot_button,SIGNAL(clicked(bool)), this, SLOT(on_home_robot_button_clicked()));
 
     main_layout.addWidget(&home_robot_button,row+2,0,Qt::AlignCenter);
+    main_layout.addWidget(&start_robot_button,row+2,1,Qt::AlignCenter);
     main_layout.addWidget(&stop_robot_button,row+2,2,Qt::AlignCenter);
 
     setLayout(&main_layout);
@@ -116,6 +122,13 @@ void control_widget::on_stop_robot_button_clicked()
     }
 }
 
+void control_widget::on_start_robot_button_clicked()
+{
+    std_msgs::String msg;
+    msg.data = "start";
+    left_arm_stop.publish(msg);
+    right_arm_stop.publish(msg);
+}
 void control_widget::on_command_button_clicked(const int& id)
 {
     ROS_DEBUG_STREAM("command "<<map_button.at(id)->text().toStdString());
