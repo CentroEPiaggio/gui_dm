@@ -63,7 +63,7 @@ Viewer::Viewer ( QWidget* parent) :QGraphicsView ( parent )
     new_message=false;
     mutex.unlock();
     mutex.lock();
-    graph_sub=node.subscribe<dual_manipulation_shared::graph>("computed_graph",1,&Viewer::subscriber_callback,this);
+    graph_sub=node.subscribe<dual_manipulation_shared::graph>("computed_graph",100,&Viewer::subscriber_callback,this);
     mutex.unlock();
 }
 
