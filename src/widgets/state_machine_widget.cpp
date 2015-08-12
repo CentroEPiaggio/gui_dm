@@ -3,6 +3,7 @@
 #include <std_msgs/String.h>
 #include "widgets/image_widget.h"
 #include <QtCore/QSettings>
+#include <fcntl.h>
 #define STR_DECLARE(x) const std::string x = #x;
 
 namespace transition
@@ -95,6 +96,7 @@ state_machine_widget::state_machine_widget():Viewer()
         std::make_tuple( ik_planning        , std::make_pair(ik_transition::fail,true)                ,   ik_need_replan    ),
         std::make_tuple( ik_need_replan     , std::make_pair(ik_transition::fail,true)                ,   failing           )
     };
+    this->table=transition_table;
     timer.setInterval(1000);
     connect(&timer,SIGNAL(timeout()),this,SLOT(save()));
     timer.setSingleShot(false);
@@ -130,9 +132,9 @@ state_machine_widget::state_machine_widget():Viewer()
             QList<QGraphicsItem*> l;
             l.append(e);
             l.append(s);
-//             auto g = Scene->createItemGroup(l);
-//             g->setFlag(QGraphicsItem::ItemIsSelectable,true);
-//             g->setFlag(QGraphicsItem::ItemIsMovable,true);
+            auto g = Scene->createItemGroup(l);
+            g->setFlag(QGraphicsItem::ItemIsSelectable,true);
+            g->setFlag(QGraphicsItem::ItemIsMovable,true);
 //             g->setPos(coords);
             states[std::get<0>(t)]=e;
         }
@@ -147,12 +149,15 @@ state_machine_widget::state_machine_widget():Viewer()
         QLineF main_line(states.at(std::get<0>(t))->scenePos()+QPointF(50,25),states.at(std::get<2>(t))->scenePos()+QPointF(50,25));
         double dx = main_line.normalVector().unitVector().dx();
         double dy = main_line.normalVector().unitVector().dy();
-        
         int factor = main_line.length()/3;
         double final_intersect_x=0, final_intersect_y=0;
         final_intersect_x = 50*25*dx/::sqrt(50*50*dy*dy+25*25*dx*dx);
         final_intersect_y = 50*25*dy/::sqrt(50*50*dy*dy+25*25*dx*dx);
-        paintArrow(states.at(std::get<0>(t))->scenePos()+QPointF(50,25),states.at(std::get<2>(t))->scenePos()+QPointF(50+final_intersect_x,25+final_intersect_y));
+        Arrow arrow;
+        if (paintArrow(states.at(std::get<0>(t))->scenePos()+QPointF(50,25),states.at(std::get<2>(t))->scenePos()+QPointF(50+final_intersect_x,25+final_intersect_y),arrow))
+            arrows[std::get<0>(t)][std::get<2>(t)]=arrow;
+        else
+            std::cout<<"Error during the drawing of an arrow, please move the states and restart"<<std::endl;
     }
     timer.start();
     
@@ -177,12 +182,57 @@ state_machine_widget::~state_machine_widget()
 
 void state_machine_widget::paintEvent(QPaintEvent* event)
 {
+    for (auto map_arrow:arrows)
+    {
+        for (auto arrow:map_arrow.second)
+            moveArrow(arrow.second,map_arrow.first,arrow.first);
+    }
     QGraphicsView::paintEvent(event);
 }
 
-void state_machine_widget::paintArrow(const QPointF q1, const QPointF q2)
+void state_machine_widget::moveArrow(Arrow& moved_arrow,std::string source,std::string target)
 {
+    QLineF main_line(states.at(source)->scenePos()+QPointF(50,25),states.at(target)->scenePos()+QPointF(50,25));
+    double dx = main_line.normalVector().unitVector().dx();
+    double dy = main_line.normalVector().unitVector().dy();
+    int factor = main_line.length()/3;
+    double final_intersect_x=0, final_intersect_y=0;
+    final_intersect_x = 50*25*dx/::sqrt(50*50*dy*dy+25*25*dx*dx);
+    final_intersect_y = 50*25*dy/::sqrt(50*50*dy*dy+25*25*dx*dx);
+    Arrow arrow;
+    auto q1=states.at(source)->scenePos()+QPointF(50,25);
+    auto q2=states.at(target)->scenePos()+QPointF(50+final_intersect_x,25+final_intersect_y);
     if (abs(q1.x()-q2.x())<10 || abs(q1.y()-q2.y())<10) return;
+    qreal arrowSize = 10;
+    main_line = QLineF(q1.x(),q1.y(),q2.x(),q2.y());
+    QPainterPath path;
+    path.moveTo(q1.x(),q1.y());
+    dx = main_line.normalVector().unitVector().dx();
+    dy = main_line.normalVector().unitVector().dy();
+    factor = main_line.length()/3;
+    path.cubicTo(q1.x()+dx*factor,q1.y()+dy*factor,q2.x()+dx*factor,q2.y()+dy*factor,q2.x(),q2.y());
+    moved_arrow.main->setPath(path);
+    final_intersect_x=0; final_intersect_y=0;
+    
+    QLineF temp(q2.x()+dx*factor,q2.y()+dy*factor,q2.x()+final_intersect_x,q2.y()+final_intersect_y);
+    double angle = ::acos(temp.dx() / temp.length());
+    if (temp.dy() >= 0)
+    {
+        angle = (M_PI * 2) - angle;
+    }
+    QPointF arrowP1 = temp.p2() - QPointF(sin(angle + M_PI / 3) * arrowSize,
+                                          cos(angle + M_PI / 3) * arrowSize);
+    
+    QPointF arrowP2 = temp.p2() - QPointF(sin(angle + M_PI - M_PI / 3) * arrowSize,
+                                          cos(angle + M_PI - M_PI / 3) * arrowSize);
+    moved_arrow.perpendicular->setLine(arrowP1.x(),arrowP1.y(),arrowP2.x(),arrowP2.y());
+    moved_arrow.left->setLine(arrowP1.x(),arrowP1.y(),temp.p2().x(),temp.p2().y());
+    moved_arrow.right->setLine(arrowP2.x(),arrowP2.y(),temp.p2().x(),temp.p2().y());
+}
+
+bool state_machine_widget::paintArrow(const QPointF q1, const QPointF q2, Arrow& created_arrow)
+{
+    if (abs(q1.x()-q2.x())<10 || abs(q1.y()-q2.y())<10) return false;
     qreal arrowSize = 10;
     QLineF main_line(q1.x(),q1.y(),q2.x(),q2.y());
     QPainterPath path;
@@ -194,6 +244,7 @@ void state_machine_widget::paintArrow(const QPointF q1, const QPointF q2)
     path.cubicTo(q1.x()+dx*factor,q1.y()+dy*factor,q2.x()+dx*factor,q2.y()+dy*factor,q2.x(),q2.y());
     auto main_spline = Scene->addPath(path);
     main_spline->setZValue(1);
+    created_arrow.main=main_spline;
     double final_intersect_x=0, final_intersect_y=0;
 
     QLineF temp(q2.x()+dx*factor,q2.y()+dy*factor,q2.x()+final_intersect_x,q2.y()+final_intersect_y);
@@ -207,8 +258,8 @@ void state_machine_widget::paintArrow(const QPointF q1, const QPointF q2)
     
     QPointF arrowP2 = temp.p2() - QPointF(sin(angle + M_PI - M_PI / 3) * arrowSize,
                                                        cos(angle + M_PI - M_PI / 3) * arrowSize);
-    Scene->addLine(arrowP1.x(),arrowP1.y(),arrowP2.x(),arrowP2.y());
-    Scene->addLine(arrowP1.x(),arrowP1.y(),temp.p2().x(),temp.p2().y());
-    Scene->addLine(arrowP2.x(),arrowP2.y(),temp.p2().x(),temp.p2().y());
-    
+    created_arrow.perpendicular = Scene->addLine(arrowP1.x(),arrowP1.y(),arrowP2.x(),arrowP2.y());
+    created_arrow.left = Scene->addLine(arrowP1.x(),arrowP1.y(),temp.p2().x(),temp.p2().y());
+    created_arrow.right = Scene->addLine(arrowP2.x(),arrowP2.y(),temp.p2().x(),temp.p2().y());
+    return true;
 }

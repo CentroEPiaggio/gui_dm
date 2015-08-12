@@ -10,6 +10,12 @@
 #include <QLabel>
 #include <std_msgs/String.h>
 
+struct Arrow
+{
+    QGraphicsLineItem *left, *right, *perpendicular;
+    QGraphicsPathItem *main;
+};
+
 class state_machine_widget: public Viewer
 {
 Q_OBJECT
@@ -20,17 +26,19 @@ public:
   void paintEvent(QPaintEvent* event);
   
 private:
-  void paintArrow(const QPointF q1, const QPointF q2);
+  bool paintArrow(const QPointF q1, const QPointF q2, Arrow& created_arrow);
   QGridLayout main_layout;
   QLabel* label;
   QGridLayout* label_layout;
   QTimer timer;
   std::map<std::string, QGraphicsEllipseItem*> states;  
   std::string current_state;
+  std::vector< std::tuple< std::string, std::pair< std::string, bool >, std::string > > table;
   void stateCallback(const std_msgs::String::ConstPtr & msg);
-  
+  std::map<std::string,std::map<std::string,Arrow>> arrows;
 private Q_SLOTS:
     void save();
+  void moveArrow(Arrow& second, std::string source, std::string target);
 };
 
 #endif // STATE_MACHINE_WIDGET_H
