@@ -79,18 +79,18 @@ state_machine_widget::state_machine_widget():Viewer()
         std::make_tuple( waiting            , std::make_pair(ik_transition::plan,true)                ,   ik_planning       ),
         //----------------------------------+---------------------------------------------------------+-------------------- +
         std::make_tuple( ik_planning        , std::make_pair(ik_transition::move,true)                ,   ik_moving         ),
-        std::make_tuple( ik_planning        , std::make_pair(ik_transition::check_grasp,true)         ,   ik_checking_grasp ),
+//         std::make_tuple( ik_planning        , std::make_pair(ik_transition::check_grasp,true)         ,   ik_checking_grasp ),
         //----------------------------------+---------------------------------------------------------+-------------------- +
         std::make_tuple( ik_moving          , std::make_pair(ik_transition::plan,true)                ,   ik_planning       ),
-//         std::make_tuple( ik_moving          , std::make_pair(ik_transition::done,true)                ,   exiting           ),
+        std::make_tuple( ik_moving          , std::make_pair(ik_transition::done,true)                ,   exiting           ),
         //----------------------------------+---------------------------------------------------------+-------------------- +
-        std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::check_done,true)          ,   ik_moving         ),
-        std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::soft_fail,true)           ,   ik_moving         ),
-        std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::plan,true)                ,   ik_planning       ),
+//         std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::check_done,true)          ,   ik_moving         ),
+//         std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::soft_fail,true)           ,   ik_moving         ),
+//         std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::plan,true)                ,   ik_planning       ),
         //----------------------------------+---------------------------------------------------------+-------------------- +
-//         std::make_tuple( ik_need_replan     , std::make_pair(ik_transition::need_replan,true)         ,   exiting           ),
+        std::make_tuple( ik_need_replan     , std::make_pair(ik_transition::need_replan,true)         ,   exiting           ),
         //----------------------------------+---------------------------------------------------------+-------------------- +
-        std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::fail,true)                ,   failing           ),
+//         std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::fail,true)                ,   failing           ),
         std::make_tuple( ik_moving          , std::make_pair(ik_transition::fail,true)                ,   failing           ),
         std::make_tuple( ik_planning        , std::make_pair(ik_transition::fail,true)                ,   ik_need_replan    ),
         std::make_tuple( ik_need_replan     , std::make_pair(ik_transition::fail,true)                ,   failing           )
@@ -99,10 +99,14 @@ state_machine_widget::state_machine_widget():Viewer()
     connect(&timer,SIGNAL(timeout()),this,SLOT(save()));
     timer.setSingleShot(false);
     QSettings settings;
-
-//pushing a fake transition just to initialize ik failing state
+    
+    //pushing a fake transition just to initialize ik failing state
     transition_table.push_back(
         std::make_tuple( failing     , std::make_pair(ik_transition::fail,true)                ,   failing           )
+    );
+    //pushing a fake transition just to initialize exiting state
+    transition_table.push_back(
+        std::make_tuple( exiting     , std::make_pair(ik_transition::fail,true)                ,   exiting           )
     );
     for (auto t:transition_table)
     {
@@ -135,6 +139,7 @@ state_machine_widget::state_machine_widget():Viewer()
     }
     current_state="steady";
     //Removing fake transition
+    transition_table.pop_back();
     transition_table.pop_back();
     
     for (auto t:transition_table)
