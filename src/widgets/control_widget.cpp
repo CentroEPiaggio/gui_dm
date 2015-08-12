@@ -76,7 +76,7 @@ void control_widget::on_home_robot_button_clicked()
     ROS_DEBUG_STREAM("command HOME to ik_control");
 
     ik_srv.request.command = "home";
-    ik_srv.request.ee_name = "both_hands";
+    ik_srv.request.ee_name = "full_robot";
 
     if (ik_client.call(ik_srv))
     {
