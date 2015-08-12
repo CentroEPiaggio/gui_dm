@@ -51,7 +51,8 @@ STR_DECLARE(failing);
 
 void state_machine_widget::stateCallback(const std_msgs::String::ConstPtr & msg)
 {
-    states.at(current_state)->setBrush(QBrush(Qt::white));
+    if (states.count(current_state))
+        states.at(current_state)->setBrush(QBrush(Qt::white));
     current_state = msg->data;
     if (states.count(current_state))
         states.at(current_state)->setBrush(QBrush(Qt::cyan));
@@ -72,7 +73,7 @@ state_machine_widget::state_machine_widget():Viewer()
         std::make_tuple( planned      , std::make_pair(transition::abort_plan,true)         ,    steady         ),
         std::make_tuple( planned      , std::make_pair(transition::start_moving,true)       ,    moving         ),
         std::make_tuple( moving       , std::make_pair(transition::task_accomplished,true)  ,    steady         ),
-        std::make_tuple( moving       , std::make_pair(transition::abort_move,true)         ,    steady         ),
+//         std::make_tuple( moving       , std::make_pair(transition::abort_move,true)         ,    steady         ),
         //----------------------------+-----------------------------------------------------+-------------------+
         std::make_tuple( getting_info , std::make_pair(transition::failed,true)             ,    steady            ),
 
@@ -135,6 +136,7 @@ state_machine_widget::state_machine_widget():Viewer()
             auto g = Scene->createItemGroup(l);
             g->setFlag(QGraphicsItem::ItemIsSelectable,true);
             g->setFlag(QGraphicsItem::ItemIsMovable,true);
+            g->setZValue(7.5);
 //             g->setPos(coords);
             states[std::get<0>(t)]=e;
         }
@@ -212,6 +214,7 @@ void state_machine_widget::moveArrow(Arrow& moved_arrow,std::string source,std::
     factor = main_line.length()/3;
     path.cubicTo(q1.x()+dx*factor,q1.y()+dy*factor,q2.x()+dx*factor,q2.y()+dy*factor,q2.x(),q2.y());
     moved_arrow.main->setPath(path);
+    moved_arrow.main->setZValue(1);
     final_intersect_x=0; final_intersect_y=0;
     
     QLineF temp(q2.x()+dx*factor,q2.y()+dy*factor,q2.x()+final_intersect_x,q2.y()+final_intersect_y);
