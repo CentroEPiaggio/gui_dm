@@ -7,6 +7,7 @@
 #include <widgets/camera_widget.h>
 #include <widgets/render_3d_widget.h>
 #include <widgets/state_machine_widget.h>
+#include <widgets/graph_widget.h>
 #include <widgets/state_widget.h>
 #include <widgets/control_widget.h>
 #include <widgets/target_widget.h>
@@ -27,8 +28,8 @@ private:
   bool setting_source_position=false;
 //   render_3d_widget render;
 //   camera_widget camera;
-  state_machine_widget state_machine;
-//   state_widget state;
+  graph_widget graph;
+  state_machine_widget state;
   control_widget control;
   target_widget* target;
 

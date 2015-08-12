@@ -35,6 +35,7 @@ qt4_wrap_cpp(VISUALIZATION_GUI_MOC_FILES
 qt4_wrap_cpp(WIDGETS_MOC_FILES
   include/widgets/render_3d_widget.h
   include/widgets/camera_widget.h
+  include/widgets/graph_widget.h
   include/widgets/state_machine_widget.h
   include/widgets/state_widget.h
   include/widgets/control_widget.h
@@ -45,6 +46,7 @@ qt4_wrap_cpp(WIDGETS_MOC_FILES
 set(WIDGET_SOURCE_FILES
   src/widgets/render_3d_widget.cpp
   src/widgets/camera_widget.cpp
+  src/widgets/graph_widget.cpp
   src/widgets/state_machine_widget.cpp
   src/widgets/state_widget.cpp
   src/widgets/control_widget.cpp

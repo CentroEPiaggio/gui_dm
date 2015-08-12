@@ -1,12 +1,13 @@
 #include "dual_manipulation_gui.h"
 #include <dual_manipulation_shared/parsing_utils.h>
 
-dual_manipulation_gui::dual_manipulation_gui(): control(&state_machine),
+dual_manipulation_gui::dual_manipulation_gui(): control(),
 main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::Horizontal),control_layout(Qt::Horizontal)
 {
     if (node.getParam("dual_manipulation_parameters", gui_params)) parseParameters(gui_params);
 
-    visualization_layout.addWidget(&state_machine);
+    visualization_layout.addWidget(&graph);
+    visualization_layout.addWidget(&state);
     
     QList<int> list= visualization_layout.sizes();
     list.replace(0,visualization_layout.width()/0.5);

@@ -12,7 +12,7 @@ public:
 
 private:
   QGridLayout main_layout;
-  QGridLayout* label_layout;
+  QGridLayout* label_layout, *label_layout1;
 };
 
 #endif // DUAL_MANIPULATION_VISUALIZATION_GUI_H

@@ -5,29 +5,32 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <cstdlib>
+#include "image_widget.h"
 #include <QTimer>
 #include <QLabel>
+#include <std_msgs/String.h>
 
-class state_machine_widget: public QWidget
+class state_machine_widget: public Viewer
 {
 Q_OBJECT
 public:
   state_machine_widget();
   ~state_machine_widget();
-  void start_timer();
-  void stop_timer();
 
-private Q_SLOTS:
-  void timer_body();
-
+  void paintEvent(QPaintEvent* event);
+  
 private:
-
+  void paintArrow(const QPointF q1, const QPointF q2);
   QGridLayout main_layout;
-  QTimer timer;
-
-  std::string img_path;
   QLabel* label;
   QGridLayout* label_layout;
+  QTimer timer;
+  std::map<std::string, QGraphicsEllipseItem*> states;  
+  std::string current_state;
+  void stateCallback(const std_msgs::String::ConstPtr & msg);
+  
+private Q_SLOTS:
+    void save();
 };
 
 #endif // STATE_MACHINE_WIDGET_H

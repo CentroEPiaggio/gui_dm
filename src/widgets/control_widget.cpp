@@ -3,7 +3,7 @@
 #include "ros/package.h"
 #include <std_msgs/String.h>
 
-control_widget::control_widget(state_machine_widget* smw_):smw(smw_)
+control_widget::control_widget()
 {
     QString path_to_package = QString::fromStdString(ros::package::getPath("dual_manipulation_gui"));
 
@@ -144,9 +144,6 @@ void control_widget::on_command_button_clicked(const int& id)
     {
 	ROS_ERROR_STREAM("Failed to call service dual_manipulation_shared::state_manager_service \'" << srv.request.command << "\'");
     }
-
-    if(map_button.at(id)->text().toStdString() == "get_info") smw->start_timer();
-    if(map_button.at(id)->text().toStdString() == "exit") smw->stop_timer();
 }
 
 control_widget::~control_widget()
