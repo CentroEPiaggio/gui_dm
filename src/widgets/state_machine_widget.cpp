@@ -20,6 +20,17 @@ namespace transition
     STR_DECLARE(exit);
     STR_DECLARE(failed);
 }
+namespace ik_transition
+{
+    STR_DECLARE(plan);
+    STR_DECLARE(move);
+    STR_DECLARE(check_grasp);
+    STR_DECLARE(done);
+    STR_DECLARE(check_done);
+    STR_DECLARE(soft_fail);
+    STR_DECLARE(fail);
+    STR_DECLARE(need_replan);
+}
 
 STR_DECLARE(starting);
 STR_DECLARE(steady);
@@ -29,6 +40,12 @@ STR_DECLARE(planning);
 STR_DECLARE(planned);
 STR_DECLARE(moving);
 STR_DECLARE(exiting);
+STR_DECLARE(waiting);
+STR_DECLARE(ik_planning);
+STR_DECLARE(ik_moving);
+STR_DECLARE(ik_checking_grasp);
+STR_DECLARE(ik_need_replan);
+STR_DECLARE(failing);
 
 
 void state_machine_widget::stateCallback(const std_msgs::String::ConstPtr & msg)
@@ -56,22 +73,37 @@ state_machine_widget::state_machine_widget():Viewer()
         std::make_tuple( moving       , std::make_pair(transition::task_accomplished,true)  ,    steady         ),
         std::make_tuple( moving       , std::make_pair(transition::abort_move,true)         ,    steady         ),
         //----------------------------+-----------------------------------------------------+-------------------+
-        //         std::make_tuple( planning     , std::make_pair(transition::planning_done,true)      ,    steady         ),
-        //         std::make_tuple( steady       , std::make_pair(transition::start_moving,true)       ,    moving         ),
-//         std::make_tuple( starting     , std::make_pair(transition::exit,true)               ,    exiting           ),
-//         std::make_tuple( steady       , std::make_pair(transition::exit,true)               ,    exiting           ),
-//         std::make_tuple( getting_info , std::make_pair(transition::exit,true)               ,    exiting           ),
-//         std::make_tuple( ready        , std::make_pair(transition::exit,true)               ,    exiting           ),
-//         std::make_tuple( planning     , std::make_pair(transition::exit,true)               ,    exiting           ),
-//         std::make_tuple( planned      , std::make_pair(transition::exit,true)               ,    exiting           ),
-//         std::make_tuple( moving       , std::make_pair(transition::exit,true)               ,    exiting           ),
-        //----------------------------+-----------------------------------------------------+-------------------+
-        std::make_tuple( getting_info , std::make_pair(transition::failed,true)             ,    steady            )
+        std::make_tuple( getting_info , std::make_pair(transition::failed,true)             ,    steady            ),
+
+        //------initial state---------------+--------- command ---------------------------------------+-- final state------ +
+        std::make_tuple( waiting            , std::make_pair(ik_transition::plan,true)                ,   ik_planning       ),
+        //----------------------------------+---------------------------------------------------------+-------------------- +
+        std::make_tuple( ik_planning        , std::make_pair(ik_transition::move,true)                ,   ik_moving         ),
+        std::make_tuple( ik_planning        , std::make_pair(ik_transition::check_grasp,true)         ,   ik_checking_grasp ),
+        //----------------------------------+---------------------------------------------------------+-------------------- +
+        std::make_tuple( ik_moving          , std::make_pair(ik_transition::plan,true)                ,   ik_planning       ),
+//         std::make_tuple( ik_moving          , std::make_pair(ik_transition::done,true)                ,   exiting           ),
+        //----------------------------------+---------------------------------------------------------+-------------------- +
+        std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::check_done,true)          ,   ik_moving         ),
+        std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::soft_fail,true)           ,   ik_moving         ),
+        std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::plan,true)                ,   ik_planning       ),
+        //----------------------------------+---------------------------------------------------------+-------------------- +
+//         std::make_tuple( ik_need_replan     , std::make_pair(ik_transition::need_replan,true)         ,   exiting           ),
+        //----------------------------------+---------------------------------------------------------+-------------------- +
+        std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::fail,true)                ,   failing           ),
+        std::make_tuple( ik_moving          , std::make_pair(ik_transition::fail,true)                ,   failing           ),
+        std::make_tuple( ik_planning        , std::make_pair(ik_transition::fail,true)                ,   ik_need_replan    ),
+        std::make_tuple( ik_need_replan     , std::make_pair(ik_transition::fail,true)                ,   failing           )
     };
     timer.setInterval(1000);
     connect(&timer,SIGNAL(timeout()),this,SLOT(save()));
     timer.setSingleShot(false);
     QSettings settings;
+
+//pushing a fake transition just to initialize ik failing state
+    transition_table.push_back(
+        std::make_tuple( failing     , std::make_pair(ik_transition::fail,true)                ,   failing           )
+    );
     for (auto t:transition_table)
     {
         if (!states.count(std::get<0>(t)))
@@ -102,6 +134,9 @@ state_machine_widget::state_machine_widget():Viewer()
         }
     }
     current_state="steady";
+    //Removing fake transition
+    transition_table.pop_back();
+    
     for (auto t:transition_table)
     {
         QLineF main_line(states.at(std::get<0>(t))->scenePos()+QPointF(50,25),states.at(std::get<2>(t))->scenePos()+QPointF(50,25));
