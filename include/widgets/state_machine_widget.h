@@ -36,6 +36,9 @@ private:
   std::vector< std::tuple< std::string, std::pair< std::string, bool >, std::string > > table;
   void stateCallback(const std_msgs::String::ConstPtr & msg);
   std::map<std::string,std::map<std::string,Arrow>> arrows;
+  std::map<std::string,std::string> type_to_state;
+  std::map<std::string,std::string> state_to_visual;
+  
 private Q_SLOTS:
     void save();
   void moveArrow(Arrow& second, std::string source, std::string target);

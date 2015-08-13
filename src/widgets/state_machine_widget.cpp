@@ -5,6 +5,7 @@
 #include <QtCore/QSettings>
 #include <fcntl.h>
 #define STR_DECLARE(x) const std::string x = #x;
+#define MAPPING(x,y,z) type_to_state[x]=y; state_to_visual[y]=z;
 
 namespace transition
 {
@@ -45,21 +46,40 @@ STR_DECLARE(waiting);
 STR_DECLARE(ik_planning);
 STR_DECLARE(ik_moving);
 STR_DECLARE(ik_checking_grasp);
-STR_DECLARE(ik_need_replan);
+// STR_DECLARE(ik_need_replan);
 STR_DECLARE(failing);
 
 
 void state_machine_widget::stateCallback(const std_msgs::String::ConstPtr & msg)
 {
+    std::string next_state;
+    if (type_to_state.count(msg->data))
+        next_state=type_to_state.at(msg->data);
+    else return;
     if (states.count(current_state))
         states.at(current_state)->setBrush(QBrush(Qt::white));
-    current_state = msg->data;
+    current_state = next_state;
     if (states.count(current_state))
         states.at(current_state)->setBrush(QBrush(Qt::cyan));
 }
 
 state_machine_widget::state_machine_widget():Viewer()
 {
+    MAPPING("starting_state",starting,"starting");
+    MAPPING("steady",steady,"steady");
+    MAPPING("getting_info_state",getting_info,"getting_info");
+    MAPPING("ready",ready,"ready");
+    MAPPING("semantic_planning_state",planning,"planning");
+    MAPPING("planned",planned,"planned");
+    MAPPING("ik_control_state",moving,"ik_control");
+    MAPPING("exit_state",exiting,"exit");
+    MAPPING("ik_steady_substate",waiting,"waiting");
+    MAPPING("ik_planning_substate",ik_planning,"ik_planning");
+    MAPPING("ik_moving_substate",ik_moving,"ik_moving");
+    MAPPING("ik_checking_grasp_substate",ik_checking_grasp,"ik_checking_grasp");
+//     MAPPING("ik_need_replan",ik_need_replan,"ik_need_replan");
+    MAPPING("ik_failing_substate",failing,"failing");
+
     std::string path=ros::package::getPath("dual_manipulation_planner");
     std::vector<std::tuple<std::string,std::pair<std::string,bool>,std::string>> transition_table{
         //------initial state---------+--------- command -----------------------------------+-- final state---- +
@@ -90,12 +110,12 @@ state_machine_widget::state_machine_widget():Viewer()
 //         std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::soft_fail,true)           ,   ik_moving         ),
 //         std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::plan,true)                ,   ik_planning       ),
         //----------------------------------+---------------------------------------------------------+-------------------- +
-        std::make_tuple( ik_need_replan     , std::make_pair(ik_transition::need_replan,true)         ,   exiting           ),
+//         std::make_tuple( ik_need_replan     , std::make_pair(ik_transition::need_replan,true)         ,   exiting           ),
         //----------------------------------+---------------------------------------------------------+-------------------- +
 //         std::make_tuple( ik_checking_grasp  , std::make_pair(ik_transition::fail,true)                ,   failing           ),
         std::make_tuple( ik_moving          , std::make_pair(ik_transition::fail,true)                ,   failing           ),
-        std::make_tuple( ik_planning        , std::make_pair(ik_transition::fail,true)                ,   ik_need_replan    ),
-        std::make_tuple( ik_need_replan     , std::make_pair(ik_transition::fail,true)                ,   failing           )
+//         std::make_tuple( ik_planning        , std::make_pair(ik_transition::fail,true)                ,   ik_need_replan    ),
+//         std::make_tuple( ik_need_replan     , std::make_pair(ik_transition::fail,true)                ,   failing           )
     };
     this->table=transition_table;
     timer.setInterval(1000);
@@ -124,7 +144,7 @@ state_machine_widget::state_machine_widget():Viewer()
             e->setFlag(QGraphicsItem::ItemIsSelectable,true);
             e->setFlag(QGraphicsItem::ItemIsMovable,true);
             e->setZValue(5);
-            auto s = Scene->addText(QString::fromStdString(std::get<0>(t)));
+            auto s = Scene->addText(QString::fromStdString(state_to_visual.at(std::get<0>(t))));
             s->setPos(coords+QPointF(50-s->boundingRect().width()/2,25+s->boundingRect().height()/2));
             s->scale(1,-1);
             s->setFlag(QGraphicsItem::ItemIsSelectable,true);
