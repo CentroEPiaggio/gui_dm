@@ -86,6 +86,9 @@ void control_widget::on_home_robot_button_clicked()
     {
 	ROS_ERROR_STREAM("Failed to call service dual_manipulation_shared::ik_service \'" << ik_srv.request.command << "\'");
     }
+    static ros::Publisher pub = n.advertise<dual_manipulation_shared::graph>("computed_graph",1);
+    dual_manipulation_shared::graph g;
+    pub.publish(g);
 }
 
 
