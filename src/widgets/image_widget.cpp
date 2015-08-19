@@ -28,6 +28,8 @@ void Viewer::subscriber_callback(const dual_manipulation_shared::graph::ConstPtr
     this->graph_msg.text=graph_msg->text;
     this->graph_msg.x=graph_msg->x;
     this->graph_msg.y=graph_msg->y;
+    this->graph_msg.filtered_source=graph_msg->filtered_source;
+    this->graph_msg.filtered_target=graph_msg->filtered_target;
     new_message=true;
     mutex.unlock();
     Scene->invalidate();
@@ -156,6 +158,12 @@ void Viewer::paintEvent ( QPaintEvent *event )
     {
         Scene->addLine(graph_msg.x[id_to_position[graph_msg.source[i]]]*2, graph_msg.y[id_to_position[graph_msg.source[i]]]*2, 
                        graph_msg.x[id_to_position[graph_msg.target[i]]]*2, graph_msg.y[id_to_position[graph_msg.target[i]]]*2,temp );
+    }
+    temp.setBrush(QColor("gray"));
+    for ( int i=0;i<graph_msg.filtered_source.size(); i++ )
+    {
+        Scene->addLine(graph_msg.x[id_to_position[graph_msg.filtered_source[i]]]*2, graph_msg.y[id_to_position[graph_msg.filtered_source[i]]]*2, 
+                       graph_msg.x[id_to_position[graph_msg.filtered_target[i]]]*2, graph_msg.y[id_to_position[graph_msg.filtered_target[i]]]*2,temp );
     }
     pen_red.setWidth(15);
     for ( int i=1;i<graph_msg.path_node_ids.size(); i++ )
