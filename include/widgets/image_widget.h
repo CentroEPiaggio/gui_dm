@@ -27,6 +27,8 @@ public:
 protected:
     virtual void wheelEvent(QWheelEvent* event);
     void closeEvent ( QCloseEvent *event );
+    virtual void saveSettings(std::string name);
+    virtual void loadSettings(std::string name);
     int timerId;
     std::string backImage;
     QImage image;

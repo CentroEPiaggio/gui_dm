@@ -67,6 +67,7 @@ Viewer::Viewer ( QWidget* parent) :QGraphicsView ( parent )
     mutex.lock();
     graph_sub=node.subscribe<dual_manipulation_shared::graph>("computed_graph",100,&Viewer::subscriber_callback,this);
     mutex.unlock();
+    loadSettings("graph");
 }
 
 void Viewer::wheelEvent(QWheelEvent* event)
@@ -106,8 +107,29 @@ void Viewer::setBackImage ( string path )
 //     Scene->addItem(temp);
 }
 
+void Viewer::loadSettings(std::string name)
+{
+    QSettings settings;
+    QByteArray t = settings.value(QString::fromStdString(name),QGraphicsView::transform()).toByteArray();
+    QDataStream s(t);
+    QTransform q;
+    s>>q;
+    QGraphicsView::setTransform(q);
+}
+
+void Viewer::saveSettings(std::string name)
+{
+    QSettings settings;
+    QByteArray a;
+    QDataStream s(&a,QIODevice::WriteOnly);
+    QTransform q = QGraphicsView::transform();
+    s<<q;
+    settings.setValue(QString::fromStdString(name),a);
+}
+
 void Viewer::closeEvent(QCloseEvent *event)
 {
+    saveSettings("graph");
     QWidget::closeEvent(event);
 }
 
@@ -172,11 +194,12 @@ void Viewer::paintEvent ( QPaintEvent *event )
                        graph_msg.x[id_to_position[graph_msg.path_node_ids[i]]]*2, graph_msg.y[id_to_position[graph_msg.path_node_ids[i]]]*2,pen_red );
     }
     }
-    mutex.unlock();    
+    mutex.unlock();
     QGraphicsView::paintEvent(event);
 }
 
 
 Viewer::~Viewer()
 {
+    saveSettings("graph");
 }

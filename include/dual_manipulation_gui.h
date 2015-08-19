@@ -21,8 +21,14 @@ public:
   dual_manipulation_gui();
   ~dual_manipulation_gui();
 
+protected:
+    void closeEvent(QCloseEvent *event);
+  
 private:
   void parseParameters(XmlRpc::XmlRpcValue& params);
+  void readSettings();
+  void writeSettings();
+  
   XmlRpc::XmlRpcValue gui_params;
   ros::NodeHandle node;
   bool setting_source_position=false;

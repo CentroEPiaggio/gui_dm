@@ -1,5 +1,6 @@
 #include "dual_manipulation_gui.h"
 #include <dual_manipulation_shared/parsing_utils.h>
+#include <QSettings>
 
 dual_manipulation_gui::dual_manipulation_gui(): control(),
 main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::Horizontal),control_layout(Qt::Horizontal)
@@ -33,6 +34,7 @@ main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::
     
     setLayout(new QGridLayout);
     layout()->addWidget(&main_layout);
+    readSettings();
 }
 
 
@@ -49,4 +51,39 @@ void dual_manipulation_gui::parseParameters(XmlRpc::XmlRpcValue& params)
 dual_manipulation_gui::~dual_manipulation_gui()
 {
 
+}
+
+void dual_manipulation_gui::closeEvent(QCloseEvent *event)
+{
+    writeSettings();
+}
+
+void dual_manipulation_gui::readSettings()
+{
+    QSettings qsettings;
+    qsettings.beginGroup( "mainwindow" );
+    
+    restoreGeometry(qsettings.value( "geometry", saveGeometry() ).toByteArray());
+    window()->windowState();
+//     restoreState(qsettings.value( "savestate", saveState() ).toByteArray());
+    move(qsettings.value( "pos", pos() ).toPoint());
+    resize(qsettings.value( "size", size() ).toSize());
+    if ( qsettings.value( "maximized", window()->isMaximized() ).toBool() )
+        showMaximized();
+    
+    qsettings.endGroup();
+}
+
+void dual_manipulation_gui::writeSettings()
+{
+    QSettings qsettings;
+    qsettings.setValue( "geometry", saveGeometry() );
+//     qsettings.setValue( "savestate", saveState() );
+    qsettings.setValue( "maximized", isMaximized() );
+    if ( !isMaximized() ) {
+        qsettings.setValue( "pos", pos() );
+        qsettings.setValue( "size", size() );
+    }
+    
+    qsettings.endGroup();
 }

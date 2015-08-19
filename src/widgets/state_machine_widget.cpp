@@ -161,6 +161,7 @@ state_machine_widget::state_machine_widget():Viewer()
             states[std::get<0>(t)]=e;
         }
     }
+    loadSettings("state_machine");
     current_state="steady";
     //Removing fake transition
     transition_table.pop_back();
@@ -195,6 +196,7 @@ void state_machine_widget::save()
         settings.setValue(ellipse.first.c_str(),ellipse.second->scenePos());
 //         std::cout<<ellipse.second->scenePos().x()<<" "<<ellipse.second->scenePos().y()<<std::endl;
     }
+    saveSettings("state_machine");
 }
 
 state_machine_widget::~state_machine_widget()
