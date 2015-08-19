@@ -37,7 +37,7 @@ void Viewer::subscriber_callback(const dual_manipulation_shared::graph::ConstPtr
 }
 
 
-Viewer::Viewer ( QWidget* parent) :QGraphicsView ( parent )
+Viewer::Viewer ( QWidget* parent) :QGraphicsView ( parent ),name("graph")
 {
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     //Set-up the scene
@@ -67,7 +67,7 @@ Viewer::Viewer ( QWidget* parent) :QGraphicsView ( parent )
     mutex.lock();
     graph_sub=node.subscribe<dual_manipulation_shared::graph>("computed_graph",100,&Viewer::subscriber_callback,this);
     mutex.unlock();
-    loadSettings("graph");
+    loadSettings(name);
 }
 
 void Viewer::wheelEvent(QWheelEvent* event)
@@ -82,6 +82,8 @@ void Viewer::wheelEvent(QWheelEvent* event)
         // Zooming out
         scale(1.0 / scaleFactor, 1.0 / scaleFactor);
     }
+    saveSettings(name);
+    
     // Don't call superclass handler here
     // as wheel is normally used for moving scrollbars
     // QGraphicsView::wheelEvent(event);
@@ -110,26 +112,46 @@ void Viewer::setBackImage ( string path )
 void Viewer::loadSettings(std::string name)
 {
     QSettings settings;
-    QByteArray t = settings.value(QString::fromStdString(name),QGraphicsView::transform()).toByteArray();
-    QDataStream s(t);
-    QTransform q;
-    s>>q;
+    qreal m11,m12,m13,m21,m22,m23,m31,m32,m33;
+    if (!settings.contains(QString::fromStdString(name)+"m11"))
+        return;
+    #define save_m(x) x = settings.value(QString::fromStdString(name)+#x,QGraphicsView::transform().x()).toReal();
+//     m11 = settings.value(QString::fromStdString(name)+"m11",QGraphicsView::transform().m11()).toReal();
+    save_m(m11)
+    save_m(m12)
+    save_m(m13)
+    save_m(m22)
+    save_m(m21)
+    save_m(m23)
+    save_m(m31)
+    save_m(m32)
+    save_m(m33)
+    #undef save_m
+    QTransform q(m11,m12,m13,m21,m22,m23,m31,m32,m33);
     QGraphicsView::setTransform(q);
 }
 
 void Viewer::saveSettings(std::string name)
 {
     QSettings settings;
-    QByteArray a;
-    QDataStream s(&a,QIODevice::WriteOnly);
     QTransform q = QGraphicsView::transform();
-    s<<q;
-    settings.setValue(QString::fromStdString(name),a);
+    #define save_m(x)     settings.setValue(QString::fromStdString(name)+#x,q.x());
+//     settings.setValue(QString::fromStdString(name)+"m11",q.m11());
+    save_m(m11)
+    save_m(m12)
+    save_m(m13)
+    save_m(m22)
+    save_m(m21)
+    save_m(m23)
+    save_m(m31)
+    save_m(m32)
+    save_m(m33)
+    #undef save_m
 }
 
 void Viewer::closeEvent(QCloseEvent *event)
 {
-    saveSettings("graph");
+    saveSettings(name);
     QWidget::closeEvent(event);
 }
 
@@ -201,5 +223,5 @@ void Viewer::paintEvent ( QPaintEvent *event )
 
 Viewer::~Viewer()
 {
-    saveSettings("graph");
+    saveSettings(name);
 }

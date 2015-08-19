@@ -65,6 +65,7 @@ void state_machine_widget::stateCallback(const std_msgs::String::ConstPtr & msg)
 
 state_machine_widget::state_machine_widget():Viewer()
 {
+    name="state_machine";
     MAPPING("starting_state",starting,"starting");
     MAPPING("steady",steady,"steady");
     MAPPING("getting_info_state",getting_info,"getting_info");
@@ -161,7 +162,7 @@ state_machine_widget::state_machine_widget():Viewer()
             states[std::get<0>(t)]=e;
         }
     }
-    loadSettings("state_machine");
+    loadSettings(name);
     current_state="steady";
     //Removing fake transition
     transition_table.pop_back();
@@ -196,7 +197,7 @@ void state_machine_widget::save()
         settings.setValue(ellipse.first.c_str(),ellipse.second->scenePos());
 //         std::cout<<ellipse.second->scenePos().x()<<" "<<ellipse.second->scenePos().y()<<std::endl;
     }
-    saveSettings("state_machine");
+    saveSettings(name);
 }
 
 state_machine_widget::~state_machine_widget()

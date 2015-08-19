@@ -77,6 +77,8 @@ void dual_manipulation_gui::readSettings()
 void dual_manipulation_gui::writeSettings()
 {
     QSettings qsettings;
+    qsettings.beginGroup( "mainwindow" );
+    
     qsettings.setValue( "geometry", saveGeometry() );
 //     qsettings.setValue( "savestate", saveState() );
     qsettings.setValue( "maximized", isMaximized() );

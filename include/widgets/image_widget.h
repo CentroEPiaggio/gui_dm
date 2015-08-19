@@ -38,6 +38,7 @@ protected:
     bool new_message;
     ros::Subscriber graph_sub;
     ros::NodeHandle node;
+    std::string name;
 private:
     void subscriber_callback(const dual_manipulation_shared::graph::ConstPtr& graph_msg);
     dual_manipulation_shared::graph graph_msg;
