@@ -33,6 +33,7 @@ private Q_SLOTS:
   void on_source_coord_edit_changed(const int& id);
   void on_target_coord_edit_changed(const int& id);
   void on_set_target_clicked();
+  void on_copy_source_clicked();
   void publish_marker();
   void on_object_changed();
 
@@ -59,6 +60,7 @@ private:
   QComboBox object_selection;
   QPushButton publish_button;
   QPushButton set_target_button;
+  QPushButton copy_source;
   geometry_msgs::Pose source_pose, target_pose;
   std::string source_id;
   ros::NodeHandle n;

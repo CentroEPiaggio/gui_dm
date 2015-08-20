@@ -114,9 +114,11 @@ target_widget::target_widget(bool setting_source_position_): setting_source_posi
     connect (&target_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_target_coord_edit_changed(int))) ;
 
     set_target_button.setText("Set Target");
+    copy_source.setText("Target=Source");
     publish_button.setText("Publish Markers");
     
     connect(&set_target_button, SIGNAL(clicked()), this, SLOT(on_set_target_clicked()));
+    connect(&copy_source, SIGNAL(clicked()), this, SLOT(on_copy_source_clicked()));
     connect(&publish_button, SIGNAL(clicked(bool)), this, SLOT(publish_marker()));
 
     for(auto item:db_mapper.Objects)
@@ -132,6 +134,7 @@ target_widget::target_widget(bool setting_source_position_): setting_source_posi
     main_layout.addWidget(&object_selection,row+1,0,Qt::AlignCenter);
     main_layout.addWidget(&set_target_button,row+1,1,Qt::AlignCenter);
     main_layout.addWidget(&publish_button,row+1,2,Qt::AlignCenter);
+    main_layout.addWidget(&copy_source,row+1,3,Qt::AlignCenter);
     if(setting_source_position) main_layout.addWidget(&clicking_pose,row+1,3,Qt::AlignCenter);
   
     setLayout(&main_layout);
@@ -501,6 +504,13 @@ void target_widget::on_set_target_clicked()
     msg.name = object_selection.currentText().toStdString();
 
     target_pub.publish(msg);
+}
+
+void target_widget::on_copy_source_clicked()
+{
+    target_pose = source_pose;
+    update_coords(target_coord_map,target_pose);
+    publish_marker();
 }
 
 void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg msg)

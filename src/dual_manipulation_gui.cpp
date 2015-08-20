@@ -35,6 +35,10 @@ main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::
     setLayout(new QGridLayout);
     layout()->addWidget(&main_layout);
     readSettings();
+
+    std::string b="\033[0;34m";
+    std::string n="\033[0m";
+    ROS_INFO_STREAM(b<<"Dual Manipulation GUI ready to be used!"<<n);
 }
 
 
