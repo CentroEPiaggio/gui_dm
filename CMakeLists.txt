@@ -32,6 +32,10 @@ qt4_wrap_cpp(VISUALIZATION_GUI_MOC_FILES
   include/dual_manipulation_visualization_gui.h
 )
 
+qt4_wrap_cpp(STOP_WINDOW_MOC_FILES
+  include/stop_window.h
+)
+
 qt4_wrap_cpp(WIDGETS_MOC_FILES
   include/widgets/render_3d_widget.h
   include/widgets/camera_widget.h
@@ -70,6 +74,14 @@ set(VISUALIZATION_SOURCE_FILES
   ${WIDGET_SOURCE_FILES}
 )
 
+set(STOP_WINDOW_SOURCE_FILES
+  src/stop_window.cpp
+  src/main_stop_window.cpp
+  ${STOP_WINDOW_MOC_FILES}
+  ${WIDGETS_MOC_FILES}
+  ${WIDGET_SOURCE_FILES}
+)
+
 add_executable(dual_manipulation_gui ${SOURCE_FILES})
 
 target_link_libraries(dual_manipulation_gui ${QT_LIBRARIES} ${catkin_LIBRARIES})
@@ -80,3 +92,7 @@ add_dependencies(dual_manipulation_gui dual_manipulation_shared_gencpp)
 add_executable(visualization_gui ${VISUALIZATION_SOURCE_FILES})
 target_link_libraries(visualization_gui ${QT_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(visualization_gui dual_manipulation_shared_gencpp)
+
+add_executable(stop_window ${STOP_WINDOW_SOURCE_FILES})
+target_link_libraries(stop_window ${QT_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(stop_window dual_manipulation_shared_gencpp)
