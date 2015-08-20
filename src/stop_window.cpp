@@ -8,7 +8,8 @@ stop_window::stop_window(): QWidget()
     right_arm_stop = n.advertise<std_msgs::String>("/right_arm/emergency_stop",10);
 
     QString path_to_package = QString::fromStdString(ros::package::getPath("dual_manipulation_gui"));
-    stop_robot_button.setFixedSize(100,100);
+    stop_robot_button.setMinimumSize(10,10);
+    stop_robot_button.setMaximumSize(1000,1000);
     stop_robot_button.setIcon(QIcon(path_to_package + "/stop.png"));
     stop_robot_button.setIconSize( QSize(stop_robot_button.size().width(), stop_robot_button.size().height() ));
     
