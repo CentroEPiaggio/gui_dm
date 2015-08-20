@@ -61,13 +61,14 @@ void state_machine_widget::stateCallback(const std_msgs::String::ConstPtr & msg)
     current_state = next_state;
     if (states.count(current_state))
         states.at(current_state)->setBrush(QBrush(Qt::cyan));
+    Scene->invalidate();
 }
 
 state_machine_widget::state_machine_widget():Viewer()
 {
     name="state_machine";
     MAPPING("starting_state",starting,"starting");
-    MAPPING("steady",steady,"steady");
+    MAPPING("steady_state",steady,"steady");
     MAPPING("getting_info_state",getting_info,"getting_info");
     MAPPING("ready",ready,"ready");
     MAPPING("semantic_planning_state",planning,"planning");
