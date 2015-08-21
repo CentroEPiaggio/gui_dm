@@ -135,7 +135,7 @@ target_widget::target_widget(bool setting_source_position_): setting_source_posi
     main_layout.addWidget(&set_target_button,row+1,1,Qt::AlignCenter);
     main_layout.addWidget(&publish_button,row+1,2,Qt::AlignCenter);
     main_layout.addWidget(&copy_source,row+1,3,Qt::AlignCenter);
-    if(setting_source_position) main_layout.addWidget(&clicking_pose,row+1,3,Qt::AlignCenter);
+    if(setting_source_position) main_layout.addWidget(&clicking_pose,row+1,4,Qt::AlignCenter);
   
     setLayout(&main_layout);
     
