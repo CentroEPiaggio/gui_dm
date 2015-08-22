@@ -225,6 +225,7 @@ void target_widget::on_object_changed()
     {
       source_pose = source_poses.at(object_selection.currentIndex());
       source_id = source_ids.at(object_selection.currentIndex());
+      update_coords(source_coord_map,source_pose);
     }
     update_mesh_resources();
     publish_marker();
