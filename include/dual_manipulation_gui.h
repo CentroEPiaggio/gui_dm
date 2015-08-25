@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QSplitter>
+#include <QSocketNotifier>
 #include <cstdlib>
 #include <widgets/camera_widget.h>
 #include <widgets/render_3d_widget.h>
@@ -21,9 +22,12 @@ public:
   dual_manipulation_gui();
   ~dual_manipulation_gui();
 
+  //Unix signal handlers
+  static void intSignalHandler(int);
 protected:
     void closeEvent(QCloseEvent *event);
-  
+public Q_SLOTS:
+    void handleSigInt();
 private:
   void parseParameters(XmlRpc::XmlRpcValue& params);
   void readSettings();
@@ -46,6 +50,9 @@ private:
   QSplitter control_layout;
   
   QSplitter state_layout;
+  
+  static int sigintFd[2];
+  QSocketNotifier* snInt;
 };
 
 #endif // DUAL_MANIPULATION_GUI_H

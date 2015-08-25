@@ -26,6 +26,12 @@ int main(int argc, char *argv[])
     a.setApplicationName("Dual_Manipulation_GUI");
     dual_manipulation_gui dmg;
     
+    struct sigaction sigint;
+    sigint.sa_handler = dual_manipulation_gui::intSignalHandler;
+    sigemptyset(&sigint.sa_mask);
+    sigint.sa_flags |= SA_RESTART;
+    if (sigaction(SIGINT, &sigint, 0) > 0) ROS_WARN_STREAM("Something wrong with unix interrupt signal handling");
+    
     QString path_to_package = QString::fromStdString(ros::package::getPath("dual_manipulation_gui"));
     
     dmg.setWindowTitle("Dual Manipulation GUI");
