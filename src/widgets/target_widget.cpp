@@ -12,7 +12,7 @@
 #define OBJ_GRASP_FACTOR 1000
 #define DEBUG 0
 
-target_widget::target_widget(bool setting_source_position_): setting_source_position(setting_source_position_)
+target_widget::target_widget(bool setting_source_position_, message_widget* message_): setting_source_position(setting_source_position_), message(message_)
 {
     gui_target_service = n.advertiseService("gui_target_service", &target_widget::gui_target_service_callback, this);
     sub = n.subscribe("/clicked_point",1,&target_widget::clicked_point,this);
@@ -337,13 +337,17 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
 {
     res.ack = true;
 
-    ROS_INFO_STREAM("Accepted request to set target pose: "<<req.info.c_str()<<" |> please set the object position <|");
+    std::string msg = "Accepted request to set target pose: "+req.info+" |> please set the object position <|";
+    if(message!=NULL) message->info_message(msg);
+    ROS_INFO_STREAM(msg);
 
     if(!setting_source_position)
     {
         if(req.source_poses.poses.size()==0)
         {
-            ROS_ERROR("target_widget::gui_target_service_callback : source_poses is empty!");
+            std::string msg = "target_widget::gui_target_service_callback : source_poses is empty!";
+            if(message!=NULL) message->error_message(msg);
+            ROS_ERROR_STREAM(msg);
             res.ack = false;
             return res.ack;
         }
@@ -353,7 +357,9 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
         
         if(!tf_.waitForTransform("/world",req.source_poses.poses.at(0).parent_frame,ros::Time(0),ros::Duration(3),ros::Duration(0.01),&err_msg))
         {
-            ROS_ERROR("target_widget::gui_target_service_callback : TF ERROR: %s",err_msg.c_str());
+            std::string msg = "target_widget::gui_target_service_callback : TF ERROR: " + err_msg;
+            if(message!=NULL) message->error_message(msg);
+            ROS_ERROR_STREAM(msg);
             res.ack = false;
             return res.ack;
         }
@@ -554,18 +560,24 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
             ROS_DEBUG_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << " OK!");
             if(!db_mapper.Objects.count(obj_id_))
             {
-                ROS_WARN_STREAM("Object "<<obj_id_<<" is not in the database! . . . Retry!");
+                std::string msg = "Object "+std::to_string(obj_id_)+" is not in the database! . . . Retry!";
+                if(message!=NULL) message->warning_message(msg);
+                ROS_WARN_STREAM(msg);
                 continue;
             }
             if(!db_mapper.Grasps.count(grasp_id_))
             {
-                ROS_WARN_STREAM("Grasp #"<<grasp_id_<<" is not in the database! . . . Retry!");
+                std::string msg = "Grasp #"+std::to_string(grasp_id_)+" is not in the database! . . . Retry!";
+                if(message!=NULL) message->warning_message(msg);
+                ROS_WARN_STREAM(msg);
                 continue;
             }
         }
         else
         {
-            ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
+            std::string msg = "Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) + "! . . . Retry!";
+            if(message!=NULL) message->warning_message(msg);
+            ROS_WARN_STREAM(msg);
             continue;
         }
     
@@ -602,21 +614,27 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_ % OBJ_GRASP_FACTOR);
         if(deserialize_ik(grasp_msg,file_name))
         {
-            ROS_DEBUG_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << " OK!");
+            ROS_DEBUG_STREAM("Deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) + " OK!");
             if(!db_mapper.Objects.count(obj_id_))
             {
-                ROS_WARN_STREAM("Object "<<obj_id_<<" is not in the database! . . . Retry!");
+                std::string msg = "Object "+std::to_string(obj_id_)+" is not in the database! . . . Retry!";
+                if(message!=NULL) message->warning_message(msg);
+                ROS_WARN_STREAM(msg);
                 continue;
             }
             if(!db_mapper.Grasps.count(grasp_id_))
             {
-                ROS_WARN_STREAM("Grasp #"<<grasp_id_<<" is not in the database! . . . Retry!");
+                std::string msg = "Grasp #"+std::to_string(grasp_id_)+" is not in the database! . . . Retry!";
+                if(message!=NULL) message->warning_message(msg);
+                ROS_WARN_STREAM(msg);
                 continue;
             }
         }
         else
         {
-            ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
+            std::string msg = "Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) + "! . . . Retry!";
+            if(message!=NULL) message->warning_message(msg);
+            ROS_WARN_STREAM(msg);
             continue;
         }
     
@@ -655,7 +673,9 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_ % OBJ_GRASP_FACTOR);
         if(!deserialize_ik(grasp_msg,file_name))
         {
-            ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
+            std::string msg = "Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) + "! . . . Retry!";
+            if(message!=NULL) message->warning_message(msg);
+            ROS_WARN_STREAM(msg);
             continue;
         }
     
@@ -690,7 +710,9 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
         file_name = "object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_ % OBJ_GRASP_FACTOR);
         if(!deserialize_ik(grasp_msg,file_name))
         {
-            ROS_WARN_STREAM("Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) << "! . . . Retry!");
+            std::string msg = "Error in deserialization object" + std::to_string(obj_id_) + "/grasp" + std::to_string(grasp_id_) + "! . . . Retry!";
+            if(message!=NULL) message->warning_message(msg);
+            ROS_WARN_STREAM(msg);
             continue;
         }
     
@@ -721,7 +743,9 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
     }
 #endif
 
-    ROS_INFO_STREAM("Publishing good grasp markers");
+    std::string msg__ = "Publishing good grasp markers";
+    if(message!=NULL) message->info_message(msg__);
+    ROS_INFO_STREAM(msg__);
     good_grasp_publisher.publish(markers);
 }
 

@@ -6,7 +6,7 @@
 
 int dual_manipulation_gui::sigintFd[2];
 
-dual_manipulation_gui::dual_manipulation_gui(): control(),
+dual_manipulation_gui::dual_manipulation_gui(): control(&message),
 main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::Horizontal),control_layout(Qt::Horizontal)
 {
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sigintFd)) ROS_WARN_STREAM("Couldn't create SIGINT socketpair");
@@ -23,30 +23,35 @@ main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::
     list.replace(1,visualization_layout.width()/0.5);
     visualization_layout.setSizes(list);
 
-    target = new target_widget(setting_source_position);
+    target = new target_widget(setting_source_position,&message);
     
     state_layout.addWidget(target);
     
     control_layout.addWidget(&control);
-  
+
+    message_layout.addWidget(&message);
 
     main_layout.addWidget(&state_layout);
     main_layout.addWidget(&visualization_layout);
     main_layout.addWidget(&control_layout);
+    main_layout.addWidget(&message_layout);
     
     QList<int> list3= main_layout.sizes();
     list3.replace(0,main_layout.height()/0.4);
     list3.replace(1,main_layout.height()/0.2);
-    list3.replace(2,main_layout.height()/0.4);
+    list3.replace(2,main_layout.height()/0.35);
+    list3.replace(3,main_layout.height()/0.05);
     main_layout.setSizes(list3);
     
     setLayout(new QGridLayout);
     layout()->addWidget(&main_layout);
     readSettings();
 
+    std::string msg = "Dual Manipulation GUI ready to be used!";
+    message.cool_message(msg);
     std::string b="\033[0;34m";
     std::string n="\033[0m";
-    ROS_INFO_STREAM(b<<"Dual Manipulation GUI ready to be used!"<<n);
+    ROS_INFO_STREAM(b<<msg<<n);
 }
 
 void dual_manipulation_gui::intSignalHandler(int)
@@ -61,9 +66,11 @@ void dual_manipulation_gui::handleSigInt()
     char tmp;
     ::read(sigintFd[1], &tmp, sizeof(tmp));
 
+    std::string msg = "CTRL+C intercepted!";
+    message.cool_message(msg);
     std::string b="\033[0;34m";
     std::string n="\033[0m";
-    ROS_INFO_STREAM(b<<"CTRL+C intercepted!"<<n);
+    ROS_INFO_STREAM(b<<msg<<n);
 
     snInt->setEnabled(true);
     
@@ -82,9 +89,11 @@ void dual_manipulation_gui::parseParameters(XmlRpc::XmlRpcValue& params)
 
 dual_manipulation_gui::~dual_manipulation_gui()
 {
+    std::string msg = "Dying...";
+    message.cool_message(msg);
     std::string b="\033[0;34m";
     std::string n="\033[0m";
-    ROS_INFO_STREAM(b<<"Dying..."<<n);
+    ROS_INFO_STREAM(b<<msg<<n);
 }
 
 void dual_manipulation_gui::closeEvent(QCloseEvent *event)

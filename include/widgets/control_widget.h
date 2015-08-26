@@ -11,12 +11,13 @@
 #include "dual_manipulation_shared/state_manager_service.h"
 #include "dual_manipulation_shared/ik_service.h"
 #include "widgets/state_machine_widget.h"
+#include "widgets/message_widget.h"
 
 class control_widget: public QWidget
 {
 Q_OBJECT
 public:
-  control_widget();
+  control_widget(message_widget* message_=NULL);
   ~control_widget();
 
 private Q_SLOTS:
@@ -26,6 +27,7 @@ private Q_SLOTS:
   void on_home_robot_button_clicked();
 
 private:
+  message_widget* message;
   QSignalMapper signalMapper;
   QGridLayout main_layout;
 

@@ -56,6 +56,7 @@ set(WIDGET_SOURCE_FILES
   src/widgets/control_widget.cpp
   src/widgets/target_widget.cpp
   src/widgets/image_widget.cpp
+  src/widgets/message_widget.cpp
 )
 
 set(SOURCE_FILES

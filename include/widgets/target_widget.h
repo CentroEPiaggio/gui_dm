@@ -21,12 +21,13 @@
 #include "dual_manipulation_shared/databasemapper.h"
 #include "tf/transform_broadcaster.h"
 #include "dual_manipulation_shared/good_grasp_msg.h"
+#include "widgets/message_widget.h"
 
 class target_widget: public QWidget
 {
 Q_OBJECT
 public:
-  target_widget(bool setting_source_position_);
+  target_widget(bool setting_source_position_,message_widget* message_=NULL);
   ~target_widget();
 
 private Q_SLOTS:
@@ -38,6 +39,7 @@ private Q_SLOTS:
   void on_object_changed();
 
 private:
+  message_widget* message;
   bool setting_source_position;
   QSignalMapper source_signalMapper, target_signalMapper;
   QGridLayout main_layout;

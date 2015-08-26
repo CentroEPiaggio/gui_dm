@@ -12,6 +12,7 @@
 #include <widgets/state_widget.h>
 #include <widgets/control_widget.h>
 #include <widgets/target_widget.h>
+#include <widgets/message_widget.h>
 #include <XmlRpcValue.h>
 #include "ros/ros.h"
 
@@ -40,6 +41,7 @@ private:
 //   camera_widget camera;
   graph_widget graph;
   state_machine_widget state;
+  message_widget message;
   control_widget control;
   target_widget* target;
 
@@ -48,6 +50,8 @@ private:
   QSplitter visualization_layout;
   
   QSplitter control_layout;
+  
+  QSplitter message_layout;
   
   QSplitter state_layout;
   
