@@ -197,14 +197,14 @@ target_widget::target_widget(bool setting_source_position_, message_widget* mess
 
 void target_widget::update_mesh_resources()
 {
-    std::string path = "package://asus_scanner_models/";
+    std::string path;
     for(auto item:db_mapper.Objects)
     {
     std::string db_obj_name(std::get<0>(item.second));
     if((!source_id.empty() && source_id.compare(db_obj_name) == 0) || 
         (source_id.empty() && (object_selection.currentText().toStdString().compare(0,db_obj_name.length(),db_obj_name) == 0)))
     {
-        path.append(std::get<1>(item.second));
+        path = std::get<1>(item.second);
         obj_id_ = item.first;
         break;
     }
