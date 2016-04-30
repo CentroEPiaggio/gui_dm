@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <QSignalMapper>
 #include <QComboBox>
+#include <QCheckBox>
 #include <map>
 #include <mutex>
 #include "ros/ros.h"
@@ -37,6 +38,7 @@ private Q_SLOTS:
   void on_copy_source_clicked();
   void publish_marker();
   void on_object_changed();
+  void on_object_checked();
 
 private:
   message_widget* message;
@@ -60,6 +62,8 @@ private:
 
   QComboBox clicking_pose;
   QComboBox object_selection;
+  QCheckBox object_check;
+  std::vector<bool> object_checked;
   QPushButton publish_button;
   QPushButton set_target_button;
   QPushButton copy_source;
@@ -72,7 +76,6 @@ private:
   ros::Subscriber sub;
   void clicked_point(const geometry_msgs::PointStampedPtr& point);
   void update_coords(std::map<int,QLineEdit*> coord_map, geometry_msgs::Pose pose);
-  int obj_id_;
 
   ros::Subscriber sub_im, im_sub_fb;
   ros::Publisher pub_target;
@@ -87,6 +90,9 @@ private:
   tf::TransformBroadcaster br;
 
   std::vector<geometry_msgs::Pose> source_poses;
+  std::vector<geometry_msgs::Pose> target_poses;
+  std::vector<int> obj_ids;
+
   std::vector<std::string> source_ids;
   ros::Publisher target_pub;
 };
