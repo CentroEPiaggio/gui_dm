@@ -22,7 +22,7 @@ dual_manipulation_gui::dual_manipulation_gui(): main_layout(Qt::Vertical),visual
     list.replace(1,visualization_layout.width()/0.5);
     visualization_layout.setSizes(list);
 
-    target = new target_widget(setting_source_position,ns_list,&message);
+    target = new target_widget(setting_source_position,ns_list,&state,&graph,&message);
     
     state_layout.addWidget(target);
     

@@ -1,16 +1,15 @@
 #include "widgets/graph_widget.h"
 #include "ros/package.h"
-#include "widgets/image_widget.h"
 #include <widgets/state_machine_widget.h>
 #include <Qt/QtSvg>
 graph_widget::graph_widget()
 {
     std::string path=ros::package::getPath("dual_manipulation_planner");
 
-    Viewer* temp= new Viewer(this);
+    viewer= new Viewer(this);
 
     label_layout = new QGridLayout();
-    label_layout->addWidget(temp);
+    label_layout->addWidget(viewer);
 //     state_machine_widget* temp1= new state_machine_widget();
 //     
 //     label_layout1 = new QGridLayout();
@@ -20,6 +19,11 @@ graph_widget::graph_widget()
     
     setLayout(&main_layout);
 
+}
+
+void graph_widget::set_ns(std::string ns)
+{
+    viewer->set_ns(ns);
 }
 
 graph_widget::~graph_widget()

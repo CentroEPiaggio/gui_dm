@@ -36,6 +36,11 @@ void Viewer::subscriber_callback(const dual_manipulation_shared::graph::ConstPtr
     return;
 }
 
+void Viewer::set_ns(std::string ns)
+{
+    graph_sub.shutdown();
+    graph_sub=node.subscribe<dual_manipulation_shared::graph>(ns+"/computed_graph",100,&Viewer::subscriber_callback,this);
+}
 
 Viewer::Viewer ( QWidget* parent) :QGraphicsView ( parent ),name("graph")
 {

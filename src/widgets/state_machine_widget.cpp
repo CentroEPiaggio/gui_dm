@@ -190,6 +190,12 @@ state_machine_widget::state_machine_widget():Viewer()
     
 }
 
+void state_machine_widget::set_ns(std::string ns)
+{
+    graph_sub.shutdown();
+    graph_sub = node.subscribe<std_msgs::String>(ns+"/state_machine_change",5,&state_machine_widget::stateCallback,this);
+}
+
 void state_machine_widget::save()
 {
     QSettings settings;

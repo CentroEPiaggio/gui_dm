@@ -51,6 +51,8 @@ public:
     double minX;
     double maxY;
     double minY;
+    
+    void set_ns(std::string ns);
 };
 
 #endif //VIEWER

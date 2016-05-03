@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <QTimer>
 #include <QLabel>
+#include "widgets/image_widget.h"
 
 class graph_widget: public QWidget
 {
@@ -15,7 +16,10 @@ public:
     graph_widget();
     ~graph_widget();
 
+    void set_ns(std::string ns);
 private:
+
+  Viewer* viewer;
 
   QGridLayout main_layout;
 

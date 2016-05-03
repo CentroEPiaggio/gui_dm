@@ -24,6 +24,8 @@ public:
   ~state_machine_widget();
 
   void paintEvent(QPaintEvent* event);
+
+  void set_ns(std::string ns);
   
 private:
   bool paintArrow(const QPointF q1, const QPointF q2, Arrow& created_arrow);

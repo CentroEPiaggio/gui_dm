@@ -13,7 +13,7 @@
 #define OBJ_GRASP_FACTOR 1000
 #define DEBUG 0
 
-target_widget::target_widget(bool setting_source_position_, std::vector<std::string> ns_list, message_widget* message_): setting_source_position(setting_source_position_), message(message_)
+target_widget::target_widget(bool setting_source_position_, std::vector< std::string > ns_list, state_machine_widget* smw_, graph_widget* gw_, message_widget* message_): setting_source_position(setting_source_position_), smw(smw_), gw(gw_), message(message_)
 {
     sub = n.subscribe("/clicked_point",1,&target_widget::clicked_point,this);
     good_grasp_subscriber = n.subscribe("/good_grasp_topic",1,&target_widget::good_grasp_callback,this);
@@ -158,6 +158,7 @@ target_widget::target_widget(bool setting_source_position_, std::vector<std::str
         obj_max=ns_list.size();
         for(auto ns:ns_list)
         {
+            namespaces.push_back(ns);
             ros::Publisher target_pub = n.advertise<dual_manipulation_shared::gui_target_response>( ns+"/gui_target_response", 1000 );
             target_pubs.push_back(target_pub);
             ros::ServiceServer gui_target_service = n.advertiseService(ns + "/gui_target_service", &target_widget::gui_target_service_callback, this);
@@ -267,12 +268,18 @@ void target_widget::on_object_checked()
 {
     if(obj_checked==obj_max && object_check.isChecked())
     {
-        object_check.setChecked(!object_check.isChecked());
+        object_check.setChecked(false);
         return;
     }
 
-    if( object_check.isChecked() ) obj_checked++;
-    else obj_checked--;
+    if( object_check.isChecked() )
+    {
+        obj_checked++;
+    }
+    else
+    {
+        obj_checked--;
+    }
 
     object_checked.at(object_selection.currentIndex()) = object_check.isChecked();
 }
@@ -281,6 +288,7 @@ void target_widget::on_object_changed()
 {
     if(source_poses.size()>object_selection.currentIndex())
     {
+      update_topics();
       target_pose = target_poses.at(object_selection.currentIndex());
       source_pose = source_poses.at(object_selection.currentIndex());
       source_id = source_ids.at(object_selection.currentIndex());
@@ -589,6 +597,7 @@ void target_widget::on_set_target_clicked()
 
     dual_manipulation_shared::gui_target_response msg;
 
+    object_ns_map.clear();
     int obj_req=0;
     for(int q=0;q<target_poses.size();q++)
     {
@@ -609,9 +618,19 @@ void target_widget::on_set_target_clicked()
 	msg.name = object_selection.itemText(q).toStdString();
 
 	target_pubs.at(obj_req).publish(msg);
+        if(obj_max!=1) object_ns_map[msg.name] = namespaces.at(obj_req);
 	obj_req++;
 	usleep(1000);
     }
+
+    update_topics();
+}
+
+void target_widget::update_topics()
+{
+    if(!object_ns_map.size()) return;
+    smw->set_ns(object_ns_map.at(object_selection.currentText().toStdString()));
+    gw->set_ns(object_ns_map.at(object_selection.currentText().toStdString()));
 }
 
 void target_widget::on_copy_source_clicked()
