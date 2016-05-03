@@ -125,7 +125,7 @@ target_widget::target_widget(bool setting_source_position_, std::vector< std::st
 	object_selection.addItem(QString::fromStdString(std::get<0>(item.second)));
 	object_checked.push_back(false);
     }
-    object_selection.setCurrentIndex(2);
+    object_selection.setCurrentIndex(0);
     object_check.setCheckState(object_checked.at(object_selection.currentIndex())?Qt::CheckState::Checked:Qt::CheckState::Unchecked);
     
     connect(&object_selection, SIGNAL(currentIndexChanged(QString)), this, SLOT(on_object_changed()));
