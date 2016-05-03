@@ -42,7 +42,7 @@ private:
   graph_widget graph;
   state_machine_widget state;
   message_widget message;
-  control_widget control;
+  control_widget* control;
   target_widget* target;
 
   QSplitter main_layout;

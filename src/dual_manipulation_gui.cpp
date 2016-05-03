@@ -6,8 +6,7 @@
 
 int dual_manipulation_gui::sigintFd[2];
 
-dual_manipulation_gui::dual_manipulation_gui(): control(&message),
-main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::Horizontal),control_layout(Qt::Horizontal)
+dual_manipulation_gui::dual_manipulation_gui(): main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::Horizontal),control_layout(Qt::Horizontal)
 {
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sigintFd)) ROS_WARN_STREAM("Couldn't create SIGINT socketpair");
     snInt = new QSocketNotifier(sigintFd[1],QSocketNotifier::Read,this);
@@ -27,7 +26,8 @@ main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::
     
     state_layout.addWidget(target);
     
-    control_layout.addWidget(&control);
+    control = new control_widget(ns_list,&message);
+    control_layout.addWidget(control);
 
     message_layout.addWidget(&message);
 
@@ -91,6 +91,8 @@ void dual_manipulation_gui::parseParameters(XmlRpc::XmlRpcValue& params)
 
 dual_manipulation_gui::~dual_manipulation_gui()
 {
+    delete target;
+    delete control;
     std::string msg = "Dying...";
     message.cool_message(msg);
     std::string b="\033[0;34m";

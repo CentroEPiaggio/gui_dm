@@ -3,7 +3,7 @@
 #include "ros/package.h"
 #include <std_msgs/String.h>
 
-control_widget::control_widget(message_widget* message_):message(message_)
+control_widget::control_widget(std::vector<std::string> ns_list, message_widget* message_):message(message_)
 {
     QString path_to_package = QString::fromStdString(ros::package::getPath("dual_manipulation_gui"));
 
@@ -67,8 +67,23 @@ control_widget::control_widget(message_widget* message_):message(message_)
 
     setLayout(&main_layout);
     
-    client = n.serviceClient<dual_manipulation_shared::state_manager_service>("state_manager_ros_service");
-    ik_client = n.serviceClient<dual_manipulation_shared::ik_service>("ik_ros_service");
+    if(ns_list.size()==0)
+    {
+        ros::ServiceClient client = n.serviceClient<dual_manipulation_shared::state_manager_service>("state_manager_ros_service");
+        ros::ServiceClient ik_client = n.serviceClient<dual_manipulation_shared::ik_service>("ik_ros_service");
+        clients.push_back(client);
+        ik_clients.push_back(ik_client);
+    }
+    else
+    {
+        for(auto ns:ns_list)
+        {
+            ros::ServiceClient client = n.serviceClient<dual_manipulation_shared::state_manager_service>(ns + "/state_manager_ros_service");
+            ros::ServiceClient ik_client = n.serviceClient<dual_manipulation_shared::ik_service>(ns + "/ik_ros_service");
+            clients.push_back(client);
+            ik_clients.push_back(ik_client);
+        }
+    }
 }
 
 void control_widget::on_home_robot_button_clicked()
@@ -78,17 +93,23 @@ void control_widget::on_home_robot_button_clicked()
     ik_srv.request.command = "home";
     ik_srv.request.ee_name = "full_robot";
 
-    if (ik_client.call(ik_srv))
+    for(auto ik_client:ik_clients)
     {
-        std::string msg = "IK Control Request \'" + ik_srv.request.command + "\' accepted: (" + std::to_string((int)srv.response.ack) + ")";
-    if(message!=NULL) message->info_message(msg);
-	ROS_INFO_STREAM(msg);
-    }
-    else
-    {
-        std::string msg = "Failed to call service dual_manipulation_shared::ik_service \'" + ik_srv.request.command + "\'";
-    if(message!=NULL) message->error_message(msg);
-	ROS_ERROR_STREAM(msg);
+        if (ik_client.call(ik_srv))
+        {
+            std::string msg = "IK Control Request \'" + ik_client.getService() + "::" + ik_srv.request.command + "\' accepted: (" + std::to_string((int)srv.response.ack) + ")";
+            if(message!=NULL)
+                message->info_message(msg);
+            ROS_INFO_STREAM(msg);
+            break;
+        }
+        else
+        {
+            std::string msg = "Failed to call service \'" + ik_client.getService() + "::" + ik_srv.request.command + "\'";
+            if(message!=NULL)
+                message->error_message(msg);
+            ROS_ERROR_STREAM(msg);
+        }
     }
     static ros::Publisher pub = n.advertise<dual_manipulation_shared::graph>("computed_graph",1);
     dual_manipulation_shared::graph g;
@@ -107,33 +128,45 @@ void control_widget::on_stop_robot_button_clicked()
 
     ik_srv.request.command = "stop";
 
-    if (ik_client.call(ik_srv))
+    for(auto ik_client:ik_clients)
     {
-        std::string msg = "IK Control Request \'" + ik_srv.request.command + "\' accepted: (" + std::to_string((int)srv.response.ack) + ")";
-    if(message!=NULL) message->info_message(msg);
-	ROS_INFO_STREAM(msg);
-    }
-    else
-    {
-    std::string msg = "Failed to call service dual_manipulation_shared::ik_service \'" + ik_srv.request.command + "\'";
-    if(message!=NULL) message->error_message(msg);
-	ROS_ERROR_STREAM(msg);
+        if (ik_client.call(ik_srv))
+        {
+            std::string msg = "IK Control Request \'" + ik_client.getService() + "::" + ik_srv.request.command + "\' accepted: (" + std::to_string((int)srv.response.ack) + ")";
+            if(message!=NULL)
+                message->info_message(msg);
+            ROS_INFO_STREAM(msg);
+            break;
+        }
+        else
+        {
+            std::string msg = "Failed to call service \'" + ik_client.getService() + "::" + ik_srv.request.command + "\'";
+            if(message!=NULL)
+                message->error_message(msg);
+            ROS_ERROR_STREAM(msg);
+        }
     }
     
     srv.request.command = "abort_move";
     srv.request.time = 0;
 
-    if (client.call(srv))
+    for(auto client:clients)
     {
-    std::string msg = "State Manager Request \'" + srv.request.command + "\' accepted: (" + std::to_string((int)srv.response.ack) + ")";
-    if(message!=NULL) message->info_message(msg);
-	ROS_INFO_STREAM(msg);
-    }
-    else
-    {
-    std::string msg = "Failed to call service dual_manipulation_shared::state_manager_service \'" + srv.request.command + "\'";
-    if(message!=NULL) message->error_message(msg);
-	ROS_ERROR_STREAM(msg);
+        if (client.call(srv))
+        {
+            std::string msg = "State Manager Request \'" + client.getService() + "::" + srv.request.command + "\' accepted: (" + std::to_string((int)srv.response.ack) + ")";
+            if(message!=NULL)
+                message->info_message(msg);
+            ROS_INFO_STREAM(msg);
+            // do not break here, but send the abort to all state_manager's
+        }
+        else
+        {
+            std::string msg = "Failed to call service \'" + client.getService() + "::" + srv.request.command + "\'";
+            if(message!=NULL)
+                message->error_message(msg);
+            ROS_ERROR_STREAM(msg);
+        }
     }
 }
 
@@ -151,17 +184,23 @@ void control_widget::on_command_button_clicked(const int& id)
     srv.request.command = map_button.at(id)->text().toStdString();
     srv.request.time = 0;
 
-    if (client.call(srv))
+    for(auto client:clients)
     {
-    std::string msg = "State Manager Request \'" + srv.request.command + "\' accepted: (" + std::to_string((int)srv.response.ack) + ")";
-    if(message!=NULL) message->info_message(msg);
-	ROS_INFO_STREAM(msg);
-    }
-    else
-    {
-    std::string msg = "Failed to call service dual_manipulation_shared::state_manager_service \'" + srv.request.command + "\'";
-    if(message!=NULL) message->error_message(msg);
-	ROS_ERROR_STREAM(msg);
+        if (client.call(srv))
+        {
+            std::string msg = "State Manager Request \'" + client.getService() + "::" + srv.request.command + "\' accepted: (" + std::to_string((int)srv.response.ack) + ")";
+            if(message!=NULL)
+                message->info_message(msg);
+            ROS_INFO_STREAM(msg);
+            // do not break here, but send the command to all state_manager's
+        }
+        else
+        {
+            std::string msg = "Failed to call service \'" + client.getService() + "::" + srv.request.command + "\'";
+            if(message!=NULL)
+                message->error_message(msg);
+            ROS_ERROR_STREAM(msg);
+        }
     }
 }
 

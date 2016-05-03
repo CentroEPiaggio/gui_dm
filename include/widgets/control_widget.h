@@ -17,7 +17,7 @@ class control_widget: public QWidget
 {
 Q_OBJECT
 public:
-  control_widget(message_widget* message_=NULL);
+  control_widget(std::vector<std::string> ns_list, message_widget* message_=NULL);
   ~control_widget();
 
 private Q_SLOTS:
@@ -40,8 +40,8 @@ private:
   std::map<int,QPushButton*> map_button;
 
   ros::NodeHandle n;
-  ros::ServiceClient client;
-  ros::ServiceClient ik_client;
+  std::vector<ros::ServiceClient> clients;
+  std::vector<ros::ServiceClient> ik_clients;
   dual_manipulation_shared::state_manager_service srv;
   dual_manipulation_shared::ik_service ik_srv;
 };
