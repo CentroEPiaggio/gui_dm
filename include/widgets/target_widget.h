@@ -71,7 +71,7 @@ private:
   std::string source_id;
   ros::NodeHandle n;
 
-  ros::ServiceServer gui_target_service;
+  std::vector<ros::ServiceServer> gui_target_services;
   bool gui_target_service_callback(dual_manipulation_shared::gui_target_service::Request &req, dual_manipulation_shared::gui_target_service::Response &res);
   ros::Subscriber sub;
   void clicked_point(const geometry_msgs::PointStampedPtr& point);

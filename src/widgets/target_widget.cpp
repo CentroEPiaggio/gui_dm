@@ -15,7 +15,6 @@
 
 target_widget::target_widget(bool setting_source_position_, std::vector<std::string> ns_list, message_widget* message_): setting_source_position(setting_source_position_), message(message_)
 {
-    gui_target_service = n.advertiseService("gui_target_service", &target_widget::gui_target_service_callback, this);
     sub = n.subscribe("/clicked_point",1,&target_widget::clicked_point,this);
     good_grasp_subscriber = n.subscribe("/good_grasp_topic",1,&target_widget::good_grasp_callback,this);
     good_grasp_publisher = n.advertise<visualization_msgs::MarkerArray>( "/good_grasp_marker", 1000, true );
@@ -148,18 +147,22 @@ target_widget::target_widget(bool setting_source_position_, std::vector<std::str
     
     if(ns_list.size()==0)
     {
-	ros::Publisher target_pub = n.advertise<dual_manipulation_shared::gui_target_response>( "/gui_target_response", 1000 );
-	target_pubs.push_back(target_pub);
-	object_check.setEnabled(false);
+        ros::Publisher target_pub = n.advertise<dual_manipulation_shared::gui_target_response>( "gui_target_response", 1000 );
+        target_pubs.push_back(target_pub);
+        object_check.setEnabled(false);
+        ros::ServiceServer gui_target_service = n.advertiseService("gui_target_service", &target_widget::gui_target_service_callback, this);
+        gui_target_services.push_back(gui_target_service);
     }
     else
     {
-	obj_max=ns_list.size();
-	for(auto ns:ns_list)
-	{
-	    ros::Publisher target_pub = n.advertise<dual_manipulation_shared::gui_target_response>( ns+"/gui_target_response", 1000 );
-	    target_pubs.push_back(target_pub);
-	}
+        obj_max=ns_list.size();
+        for(auto ns:ns_list)
+        {
+            ros::Publisher target_pub = n.advertise<dual_manipulation_shared::gui_target_response>( ns+"/gui_target_response", 1000 );
+            target_pubs.push_back(target_pub);
+            ros::ServiceServer gui_target_service = n.advertiseService(ns + "/gui_target_service", &target_widget::gui_target_service_callback, this);
+            gui_target_services.push_back(gui_target_service);
+        }
     }
     
     target_pose.orientation.w=1;
@@ -260,10 +263,10 @@ void target_widget::update_mesh_resources()
 
 void target_widget::on_object_checked()
 {
-    if(obj_checked==obj_max)
+    if(obj_checked==obj_max && object_check.isChecked())
     {
-	object_check.setChecked(!object_check.isChecked());
-	return;
+        object_check.setChecked(!object_check.isChecked());
+        return;
     }
 
     if( object_check.isChecked() ) obj_checked++;
@@ -430,8 +433,8 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
         geometry_msgs::Pose object_pose;
 
         source_poses.clear();
-    source_ids.clear();
-    object_selection.clear();
+        source_ids.clear();
+        object_selection.clear();
         int i=0;
         for(auto pose:req.source_poses.poses)
         {
@@ -445,7 +448,7 @@ bool target_widget::gui_target_service_callback(dual_manipulation_shared::gui_ta
         }
 
         object_selection.setCurrentIndex(0);
-	object_check.setCheckState(object_checked.at(object_selection.currentIndex())?Qt::CheckState::Checked:Qt::CheckState::Unchecked);
+        object_check.setCheckState(object_checked.at(object_selection.currentIndex())?Qt::CheckState::Checked:Qt::CheckState::Unchecked);
         on_object_changed();
 
         source_coord_map.at(0)->setText(QString::number(source_pose.position.x, 'f', 2));
@@ -587,7 +590,16 @@ void target_widget::on_set_target_clicked()
     int obj_req=0;
     for(int q=0;q<target_poses.size();q++)
     {
-	if(!object_checked.at(q)) continue;
+        if(obj_max==1)
+        {
+            if(object_selection.itemText(q) != object_selection.currentText())
+                continue;
+        }
+        else
+        {
+            if(!object_checked.at(q))
+                continue;
+        }
 
 	msg.target_pose = target_poses.at(q);
 	msg.source_pose = source_poses.at(q);
