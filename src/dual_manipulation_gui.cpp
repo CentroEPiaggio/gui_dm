@@ -23,7 +23,7 @@ main_layout(Qt::Vertical),visualization_layout(Qt::Horizontal),state_layout(Qt::
     list.replace(1,visualization_layout.width()/0.5);
     visualization_layout.setSizes(list);
 
-    target = new target_widget(setting_source_position,&message);
+    target = new target_widget(setting_source_position,ns_list,&message);
     
     state_layout.addWidget(target);
     
@@ -85,6 +85,8 @@ void dual_manipulation_gui::parseParameters(XmlRpc::XmlRpcValue& params)
     
     parseSingleParameter(params,use_vision,"use_vision");
     setting_source_position = !use_vision;
+
+    parseSingleParameter(params,ns_list,"ns_list");
 }
 
 dual_manipulation_gui::~dual_manipulation_gui()

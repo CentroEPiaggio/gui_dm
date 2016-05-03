@@ -28,7 +28,7 @@ class target_widget: public QWidget
 {
 Q_OBJECT
 public:
-  target_widget(bool setting_source_position_,message_widget* message_=NULL);
+  target_widget(bool setting_source_position_,std::vector<std::string> ns_list,message_widget* message_=NULL);
   ~target_widget();
 
 private Q_SLOTS:
@@ -94,7 +94,9 @@ private:
   std::vector<int> obj_ids;
 
   std::vector<std::string> source_ids;
-  ros::Publisher target_pub;
+  std::vector<ros::Publisher> target_pubs;
+  int obj_max=1;
+  int obj_checked=0;
 };
 
 #endif // TARGET_WIDGET_H

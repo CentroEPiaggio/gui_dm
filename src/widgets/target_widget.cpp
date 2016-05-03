@@ -13,11 +13,10 @@
 #define OBJ_GRASP_FACTOR 1000
 #define DEBUG 0
 
-target_widget::target_widget(bool setting_source_position_, message_widget* message_): setting_source_position(setting_source_position_), message(message_)
+target_widget::target_widget(bool setting_source_position_, std::vector<std::string> ns_list, message_widget* message_): setting_source_position(setting_source_position_), message(message_)
 {
     gui_target_service = n.advertiseService("gui_target_service", &target_widget::gui_target_service_callback, this);
     sub = n.subscribe("/clicked_point",1,&target_widget::clicked_point,this);
-    target_pub = n.advertise<dual_manipulation_shared::gui_target_response>( "/gui_target_response", 1000 );
     good_grasp_subscriber = n.subscribe("/good_grasp_topic",1,&target_widget::good_grasp_callback,this);
     good_grasp_publisher = n.advertise<visualization_msgs::MarkerArray>( "/good_grasp_marker", 1000, true );
 
@@ -131,7 +130,7 @@ target_widget::target_widget(bool setting_source_position_, message_widget* mess
     object_check.setCheckState(object_checked.at(object_selection.currentIndex())?Qt::CheckState::Checked:Qt::CheckState::Unchecked);
     
     connect(&object_selection, SIGNAL(currentIndexChanged(QString)), this, SLOT(on_object_changed()));
-    connect(&object_check, SIGNAL(stateChanged(int)), this, SLOT(on_object_checked()));
+    connect(&object_check, SIGNAL(clicked(bool)), this, SLOT(on_object_checked()));
 
     clicking_pose.addItem("CLICK: source");
     clicking_pose.addItem("CLICK: target");
@@ -145,6 +144,23 @@ target_widget::target_widget(bool setting_source_position_, message_widget* mess
     if(setting_source_position) main_layout.addWidget(&clicking_pose,row+1,5,Qt::AlignCenter);
   
     setLayout(&main_layout);
+    
+    
+    if(ns_list.size()==0)
+    {
+	ros::Publisher target_pub = n.advertise<dual_manipulation_shared::gui_target_response>( "/gui_target_response", 1000 );
+	target_pubs.push_back(target_pub);
+	object_check.setEnabled(false);
+    }
+    else
+    {
+	obj_max=ns_list.size();
+	for(auto ns:ns_list)
+	{
+	    ros::Publisher target_pub = n.advertise<dual_manipulation_shared::gui_target_response>( ns+"/gui_target_response", 1000 );
+	    target_pubs.push_back(target_pub);
+	}
+    }
     
     target_pose.orientation.w=1;
     target_pose.orientation.x=0;
@@ -244,6 +260,15 @@ void target_widget::update_mesh_resources()
 
 void target_widget::on_object_checked()
 {
+    if(obj_checked==obj_max)
+    {
+	object_check.setChecked(!object_check.isChecked());
+	return;
+    }
+
+    if( object_check.isChecked() ) obj_checked++;
+    else obj_checked--;
+
     object_checked.at(object_selection.currentIndex()) = object_check.isChecked();
 }
 
@@ -559,20 +584,20 @@ void target_widget::on_set_target_clicked()
 
     dual_manipulation_shared::gui_target_response msg;
 
+    int obj_req=0;
     for(int q=0;q<target_poses.size();q++)
     {
 	if(!object_checked.at(q)) continue;
 
-	dual_manipulation_shared::gui_single_request r;
-	r.target_pose = target_poses.at(q);
-	r.source_pose = source_poses.at(q);
-	r.obj_id = obj_ids.at(q);
-	r.name = object_selection.itemText(q).toStdString();
+	msg.target_pose = target_poses.at(q);
+	msg.source_pose = source_poses.at(q);
+	msg.obj_id = obj_ids.at(q);
+	msg.name = object_selection.itemText(q).toStdString();
 
-	msg.reqs.push_back(r);
+	target_pubs.at(obj_req).publish(msg);
+	obj_req++;
+	usleep(1000);
     }
-
-    target_pub.publish(msg);
 }
 
 void target_widget::on_copy_source_clicked()

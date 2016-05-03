@@ -57,6 +57,8 @@ private:
   
   static int sigintFd[2];
   QSocketNotifier* snInt;
+
+  std::vector<std::string> ns_list;
 };
 
 #endif // DUAL_MANIPULATION_GUI_H
