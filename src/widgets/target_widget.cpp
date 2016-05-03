@@ -235,6 +235,8 @@ target_widget::target_widget(bool setting_source_position_, std::vector<std::str
     }
     
 //     update_mesh_resources(); //to set the initial object shape
+
+    if(obj_max==1) object_check.setChecked(true);
 }
 
 void target_widget::update_mesh_resources()
@@ -282,7 +284,7 @@ void target_widget::on_object_changed()
       target_pose = target_poses.at(object_selection.currentIndex());
       source_pose = source_poses.at(object_selection.currentIndex());
       source_id = source_ids.at(object_selection.currentIndex());
-      object_check.setChecked(object_checked.at(object_selection.currentIndex()));
+      if(obj_max!=1) object_check.setChecked(object_checked.at(object_selection.currentIndex()));
       update_coords(source_coord_map,source_pose);
       update_coords(target_coord_map,target_pose);
     }
