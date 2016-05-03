@@ -288,7 +288,7 @@ void target_widget::on_object_changed()
 {
     if(source_poses.size()>object_selection.currentIndex())
     {
-      update_topics();
+      if(object_ns_map.count(object_selection.currentText().toStdString())) update_topics();
       target_pose = target_poses.at(object_selection.currentIndex());
       source_pose = source_poses.at(object_selection.currentIndex());
       source_id = source_ids.at(object_selection.currentIndex());
