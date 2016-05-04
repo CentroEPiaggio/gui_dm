@@ -149,7 +149,6 @@ target_widget::target_widget(bool setting_source_position_, std::vector< std::st
     {
         ros::Publisher target_pub = n.advertise<dual_manipulation_shared::gui_target_response>( "gui_target_response", 1000 );
         target_pubs.push_back(target_pub);
-        object_check.setEnabled(false);
         ros::ServiceServer gui_target_service = n.advertiseService("gui_target_service", &target_widget::gui_target_service_callback, this);
         gui_target_services.push_back(gui_target_service);
     }
@@ -235,7 +234,11 @@ target_widget::target_widget(bool setting_source_position_, std::vector< std::st
 	obj_ids.push_back(item.first);
     }
 
-    if(obj_max==1) object_check.setChecked(true);
+    if(obj_max==1)
+    {
+        object_check.setEnabled(false);
+        object_check.setChecked(true);
+    }
 }
 
 void target_widget::update_mesh_resources()
@@ -628,7 +631,7 @@ void target_widget::on_set_target_clicked()
 	msg.name = object_selection.itemText(q).toStdString();
 
 	target_pubs.at(obj_req).publish(msg);
-        if(obj_max!=1) object_ns_map[msg.name] = namespaces.at(obj_req);
+        if(namespaces.size()) object_ns_map[msg.name] = namespaces.at(obj_req);
 	obj_req++;
 	usleep(1000);
     }
