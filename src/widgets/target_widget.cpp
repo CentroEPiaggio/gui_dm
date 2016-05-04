@@ -24,7 +24,7 @@ target_widget::target_widget(bool setting_source_position_, std::vector< std::st
     int col = 0;
 
     source_label.setText("Source");
-    source_label.setStyleSheet("color : green");
+    source_label.setStyleSheet("color : blue");
 
     target_label.setText("Target");
     target_label.setStyleSheet("color : red");
