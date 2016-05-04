@@ -234,8 +234,6 @@ target_widget::target_widget(bool setting_source_position_, std::vector< std::st
 	source_ids.push_back(std::get<0>(item.second));
 	obj_ids.push_back(item.first);
     }
-    
-//     update_mesh_resources(); //to set the initial object shape
 
     if(obj_max==1) object_check.setChecked(true);
 }
@@ -540,8 +538,14 @@ void target_widget::publish_marker()
 {
     for(int i=0;i<target_poses.size();i++)
     {
-	if(!object_checked.at(i)) continue;
-	target_marker.pose = target_poses.at(i);
+        if(obj_max==1)
+        {
+            if(source_ids.at(i)!=object_selection.currentText().toStdString()) continue;
+        }
+        else
+            if(!object_checked.at(i)) continue;
+	
+        target_marker.pose = target_poses.at(i);
 	target_marker.id = obj_ids.at(i);
 	target_marker.mesh_resource = std::get<1>(db_mapper.Objects.at(obj_ids.at(i)));
 	pub_target.publish(target_marker);
@@ -550,7 +554,13 @@ void target_widget::publish_marker()
     
     for(int i=0;i<source_poses.size();i++)
     {
-	if(!object_checked.at(i)) continue;
+	if(obj_max==1)
+        {
+            if(source_ids.at(i)!=object_selection.currentText().toStdString()) continue;
+        }
+        else
+            if(!object_checked.at(i)) continue;
+
 	source_marker.pose = source_poses.at(i);
 	source_marker.id = obj_ids.at(i);
 	source_marker.mesh_resource = std::get<1>(db_mapper.Objects.at(obj_ids.at(i)));
