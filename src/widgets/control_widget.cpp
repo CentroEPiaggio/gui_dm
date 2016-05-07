@@ -65,7 +65,7 @@ control_widget::control_widget(std::vector<std::string> ns_list, message_widget*
     quick_button.setIcon(QIcon(path_to_package + "/quick.png"));
     quick_button.setIconSize( QSize(quick_button.size().width(), quick_button.size().height() ));
 
-    connect(&quick_button,SIGNAL(clicked(bool)), this, SLOT(on_home_robot_button_clicked()));
+    connect(&quick_button,SIGNAL(clicked(bool)), this, SLOT(on_quick_button_clicked()));
 
 
     QHBoxLayout* bt_layout = new QHBoxLayout();
