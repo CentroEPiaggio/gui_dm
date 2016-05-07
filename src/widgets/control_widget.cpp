@@ -3,7 +3,7 @@
 #include "ros/package.h"
 #include <std_msgs/String.h>
 
-control_widget::control_widget(std::vector<std::string> ns_list, message_widget* message_):message(message_)
+control_widget::control_widget(std::vector<std::string> ns_list, message_widget* message_, target_widget* target_):message(message_), target(target_)
 {
     QString path_to_package = QString::fromStdString(ros::package::getPath("dual_manipulation_gui"));
 
@@ -60,12 +60,25 @@ control_widget::control_widget(std::vector<std::string> ns_list, message_widget*
     home_robot_button.setIconSize( QSize(home_robot_button.size().width(), home_robot_button.size().height() ));
 
     connect(&home_robot_button,SIGNAL(clicked(bool)), this, SLOT(on_home_robot_button_clicked()));
+    
+    quick_button.setFixedSize(45,45);
+    quick_button.setIcon(QIcon(path_to_package + "/quick.png"));
+    quick_button.setIconSize( QSize(quick_button.size().width(), quick_button.size().height() ));
 
-    main_layout.addWidget(&home_robot_button,row+2,0,Qt::AlignCenter);
-    main_layout.addWidget(&start_robot_button,row+2,1,Qt::AlignCenter);
-    main_layout.addWidget(&stop_robot_button,row+2,2,Qt::AlignCenter);
+    connect(&quick_button,SIGNAL(clicked(bool)), this, SLOT(on_home_robot_button_clicked()));
 
-    setLayout(&main_layout);
+
+    QHBoxLayout* bt_layout = new QHBoxLayout();
+    
+    bt_layout->addWidget(&quick_button,Qt::AlignCenter);
+    bt_layout->addWidget(&home_robot_button,Qt::AlignCenter);
+    bt_layout->addWidget(&start_robot_button,Qt::AlignCenter);
+    bt_layout->addWidget(&stop_robot_button,Qt::AlignCenter);
+
+    QVBoxLayout* ex_layout = new QVBoxLayout();
+    ex_layout->addLayout(&main_layout);
+    ex_layout->addLayout(bt_layout);
+    setLayout(ex_layout);
     
     if(ns_list.size()==0)
     {
@@ -84,6 +97,18 @@ control_widget::control_widget(std::vector<std::string> ns_list, message_widget*
             ik_clients.push_back(ik_client);
         }
     }
+}
+
+void control_widget::on_quick_button_clicked()
+{
+    target->press_publish_marker();
+    usleep(100000);
+    on_command_button_clicked(0);
+    usleep(100000);
+    target->press_set_target();
+    usleep(100000);
+    on_command_button_clicked(1);
+    usleep(100000);
 }
 
 void control_widget::on_home_robot_button_clicked()

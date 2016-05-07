@@ -12,12 +12,13 @@
 #include "dual_manipulation_shared/ik_service.h"
 #include "widgets/state_machine_widget.h"
 #include "widgets/message_widget.h"
+#include "widgets/target_widget.h"
 
 class control_widget: public QWidget
 {
 Q_OBJECT
 public:
-  control_widget(std::vector<std::string> ns_list, message_widget* message_=NULL);
+  control_widget(std::vector<std::string> ns_list, message_widget* message_=NULL, target_widget* target_=NULL);
   ~control_widget();
 
 private Q_SLOTS:
@@ -25,15 +26,18 @@ private Q_SLOTS:
   void on_stop_robot_button_clicked();
   void on_start_robot_button_clicked();
   void on_home_robot_button_clicked();
+  void on_quick_button_clicked();
 
 private:
   message_widget* message;
+  target_widget* target;
   QSignalMapper signalMapper;
   QGridLayout main_layout;
 
   QPushButton home_robot_button;
   QPushButton start_robot_button;
   QPushButton stop_robot_button;
+  QPushButton quick_button;
   
   ros::Publisher left_arm_stop,right_arm_stop;
 

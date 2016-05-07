@@ -32,6 +32,8 @@ Q_OBJECT
 public:
   target_widget(bool setting_source_position_,std::vector<std::string> ns_list,state_machine_widget* smw_=NULL,graph_widget* gw_=NULL,message_widget* message_=NULL);
   ~target_widget();
+  void press_set_target();
+  void press_publish_marker();
 
 private Q_SLOTS:
   void on_source_coord_edit_changed(const int& id);

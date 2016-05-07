@@ -536,6 +536,11 @@ void target_widget::on_target_coord_edit_changed(const int& id)
     publish_marker();
 }
 
+void target_widget::press_publish_marker()
+{
+    publish_marker();
+}
+
 void target_widget::publish_marker()
 {
     for(int i=0;i<target_poses.size();i++)
@@ -585,6 +590,11 @@ void target_widget::update_coords(std::map<int,QLineEdit*> coord_map, geometry_m
     coord_map.at(3)->setText(QString::number(ro, 'f', 2));
     coord_map.at(4)->setText(QString::number(pi, 'f', 2));
     coord_map.at(5)->setText(QString::number(ya, 'f', 2));
+}
+
+void target_widget::press_set_target()
+{
+    on_set_target_clicked();
 }
 
 void target_widget::on_set_target_clicked()

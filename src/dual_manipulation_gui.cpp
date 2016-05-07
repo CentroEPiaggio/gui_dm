@@ -26,7 +26,7 @@ dual_manipulation_gui::dual_manipulation_gui(): main_layout(Qt::Vertical),visual
     
     state_layout.addWidget(target);
     
-    control = new control_widget(ns_list,&message);
+    control = new control_widget(ns_list,&message,target);
     control_layout.addWidget(control);
 
     message_layout.addWidget(&message);
