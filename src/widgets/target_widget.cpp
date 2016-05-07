@@ -4,7 +4,6 @@
 #include <ros/package.h>
 #include <QSettings>
 #include "tf_conversions/tf_kdl.h"
-#include <dual_manipulation_shared/gui_single_request.h>
 #include <dual_manipulation_shared/gui_target_response.h>
 #include "tf/transform_listener.h"
 #include "dual_manipulation_shared/grasp_trajectory.h"
