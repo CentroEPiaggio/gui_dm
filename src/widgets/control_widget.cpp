@@ -102,13 +102,12 @@ control_widget::control_widget(std::vector<std::string> ns_list, message_widget*
 void control_widget::on_quick_button_clicked()
 {
     target->press_publish_marker();
-    usleep(100000);
+    usleep(200000);
     on_command_button_clicked(0);
-    usleep(100000);
+    usleep(200000);
     target->press_set_target();
-    usleep(100000);
+    usleep(1000000);
     on_command_button_clicked(1);
-    usleep(100000);
 }
 
 void control_widget::on_home_robot_button_clicked()
