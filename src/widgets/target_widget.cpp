@@ -10,7 +10,7 @@
 #include "dual_manipulation_shared/serialization_utils.h"
 
 #define OBJ_GRASP_FACTOR 1000
-#define DEBUG 0
+#define DEBUG 1
 
 target_widget::target_widget(bool setting_source_position_, std::vector< std::string > ns_list, state_machine_widget* smw_, graph_widget* gw_, message_widget* message_): setting_source_position(setting_source_position_), smw(smw_), gw(gw_), message(message_)
 {
