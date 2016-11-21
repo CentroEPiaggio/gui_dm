@@ -33,6 +33,7 @@ void Viewer::subscriber_callback(const dual_manipulation_shared::graph::ConstPtr
     new_message=true;
     mutex.unlock();
     Scene->invalidate();
+    std::cout << "Information about the graph: #nodes=" << this->graph_msg.node_id.size() << " || #arcs=" << this->graph_msg.source.size() << " || #filtered_arcs=" << this->graph_msg.filtered_source.size() << endl;
     return;
 }
 
