@@ -84,16 +84,10 @@ set(STOP_WINDOW_SOURCE_FILES
 )
 
 add_executable(dual_manipulation_gui ${SOURCE_FILES})
-
 target_link_libraries(dual_manipulation_gui ${QT_LIBRARIES} ${catkin_LIBRARIES})
-
-add_dependencies(dual_manipulation_gui dual_manipulation_shared_gencpp)
-
 
 add_executable(visualization_gui ${VISUALIZATION_SOURCE_FILES})
 target_link_libraries(visualization_gui ${QT_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(visualization_gui dual_manipulation_shared_gencpp)
 
 add_executable(stop_window ${STOP_WINDOW_SOURCE_FILES})
 target_link_libraries(stop_window ${QT_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(stop_window dual_manipulation_shared_gencpp)
