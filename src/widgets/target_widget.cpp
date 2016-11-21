@@ -554,7 +554,7 @@ void target_widget::publish_marker()
 	
         target_marker.pose = target_poses.at(i);
 	target_marker.id = obj_ids.at(i);
-	target_marker.mesh_resource = std::get<1>(db_mapper.Objects.at(obj_ids.at(i)));
+        target_marker.mesh_resource = db_mapper.Objects.at(obj_ids.at(i)).mesh_path;
 	pub_target.publish(target_marker);
 	usleep(10000);
     }
@@ -570,7 +570,7 @@ void target_widget::publish_marker()
 
 	source_marker.pose = source_poses.at(i);
 	source_marker.id = obj_ids.at(i);
-	source_marker.mesh_resource = std::get<1>(db_mapper.Objects.at(obj_ids.at(i)));
+        source_marker.mesh_resource = db_mapper.Objects.at(obj_ids.at(i)).mesh_path;
 	pub_target.publish(source_marker);
 	usleep(10000);
     }
