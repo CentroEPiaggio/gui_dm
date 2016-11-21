@@ -723,7 +723,7 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
             continue;
         }
     
-        endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
+        endeffector_id ee_id = db_mapper.Grasps.at(grasp_id_).ee_id;
         marker.color.a = 0.75;
         marker.color.b = (ee_id==1)?0:1;
         marker.color.g = (ee_id==1)?1:0;
@@ -780,7 +780,7 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
             continue;
         }
     
-        endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
+        endeffector_id ee_id = db_mapper.Grasps.at(grasp_id_).ee_id;
         marker.color.a = 0.75;
         marker.color.b = (ee_id==1)?0:1;
         marker.color.g = (ee_id==1)?1:0;
@@ -821,7 +821,7 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
             continue;
         }
     
-        endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
+        endeffector_id ee_id = db_mapper.Grasps.at(grasp_id_).ee_id;
         marker.color.a = 0.1;
         marker.color.b = (ee_id==1)?0:0.1;
         marker.color.g = (ee_id==1)?0.1:0;
@@ -858,7 +858,7 @@ void target_widget::good_grasp_callback(dual_manipulation_shared::good_grasp_msg
             continue;
         }
     
-        endeffector_id ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
+        endeffector_id ee_id = db_mapper.Grasps.at(grasp_id_).ee_id;
         marker.color.a = 0.1;
         marker.color.b = (ee_id==1)?0:0.1;
         marker.color.g = (ee_id==1)?0.1:0;
