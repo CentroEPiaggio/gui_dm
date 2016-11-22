@@ -121,8 +121,8 @@ target_widget::target_widget(bool setting_source_position_, std::vector< std::st
 
     for(auto item:db_mapper.Objects)
     {
-	object_selection.addItem(QString::fromStdString(std::get<0>(item.second)));
-	object_checked.push_back(false);
+        object_selection.addItem(QString::fromStdString(item.second.name));
+        object_checked.push_back(false);
     }
     object_selection.setCurrentIndex(0);
     object_check.setCheckState(object_checked.at(object_selection.currentIndex())?Qt::CheckState::Checked:Qt::CheckState::Unchecked);
@@ -227,10 +227,10 @@ target_widget::target_widget(bool setting_source_position_, std::vector< std::st
     
     for(auto item:db_mapper.Objects)
     {
-	target_poses.push_back(target_pose);
-    	source_poses.push_back(source_pose);
-	source_ids.push_back(std::get<0>(item.second));
-	obj_ids.push_back(item.first);
+        target_poses.push_back(target_pose);
+        source_poses.push_back(source_pose);
+        source_ids.push_back(item.second.name);
+        obj_ids.push_back(item.first);
     }
 
     if(obj_max==1)
@@ -245,11 +245,11 @@ void target_widget::update_mesh_resources()
     std::string path;
     for(auto item:db_mapper.Objects)
     {
-    std::string db_obj_name(std::get<0>(item.second));
+    std::string db_obj_name(item.second.name);
     if((!source_id.empty() && source_id.compare(db_obj_name) == 0) || 
         (source_id.empty() && (object_selection.currentText().toStdString().compare(0,db_obj_name.length(),db_obj_name) == 0)))
     {
-        path = std::get<1>(item.second);
+        path = item.second.mesh_path;
         obj_ids.at(object_selection.currentIndex()) = item.first;
         break;
     }
