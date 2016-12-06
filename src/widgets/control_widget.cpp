@@ -2,6 +2,8 @@
 #include "ros/ros.h"
 #include "ros/package.h"
 #include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
+#include <controller_manager_msgs/SwitchController.h>
 
 control_widget::control_widget(std::vector<std::string> ns_list, message_widget* message_, target_widget* target_):message(message_), target(target_)
 {
@@ -48,9 +50,20 @@ control_widget::control_widget(std::vector<std::string> ns_list, message_widget*
     start_robot_button.setFixedSize(45,45);
     start_robot_button.setIcon(QIcon(path_to_package + "/start.png"));
     start_robot_button.setIconSize( QSize(start_robot_button.size().width(), start_robot_button.size().height() ));
-	
-	left_arm_stop = n.advertise<std_msgs::String>("/left_arm/emergency_stop",10);
-	right_arm_stop = n.advertise<std_msgs::String>("/right_arm/emergency_stop",10);
+    
+    // these are specific for the kuka lwr
+    // TODO: read these from parameters, to be slightly more generic for different robots (safety will change, though)
+    robot_namespaces = std::vector<std::string>({"/left_arm","/right_arm"});
+    regular_controllers = std::vector<std::string>({"joint_trajectory_controller", "stiffness_trajectory_controller", "damping_trajectory_controller", "add_torque_trajectory_controller"});
+    emergency_handling_controllers = std::vector<std::string>({"joint_impedance_controller"});
+    std::string stop_str("emergency_stop");
+    std::string eevent_str("emergency_event");
+    switch_controller_service = "controller_manager/switch_controller";
+    for(auto s:robot_namespaces)
+    {
+        stop_publishers.emplace_back( n.advertise<std_msgs::String>(s + std::string("/") + stop_str, 10) );
+        emergency_event_publishers.emplace_back( n.advertise<std_msgs::Bool>(s + std::string("/") + eevent_str, 10) );
+    }
 
     connect(&stop_robot_button,SIGNAL(clicked(bool)), this, SLOT(on_stop_robot_button_clicked()));
     connect(&start_robot_button,SIGNAL(clicked(bool)), this, SLOT(on_start_robot_button_clicked()));
@@ -144,11 +157,15 @@ void control_widget::on_home_robot_button_clicked()
 void control_widget::on_stop_robot_button_clicked()
 {
     ROS_DEBUG_STREAM("command STOP to ik_control");
-	
-	std_msgs::String msg;
-	msg.data = "stop";
-	left_arm_stop.publish(msg);
-	right_arm_stop.publish(msg);
+
+    std_msgs::String msg;
+    msg.data = "stop";
+    for(auto& p:stop_publishers)
+        p.publish(msg);
+    std_msgs::Bool eevent_msg;
+    eevent_msg.data = true;
+    for(auto& p:emergency_event_publishers)
+        p.publish(eevent_msg);
 
     ik_srv.request.command = "stop";
 
@@ -196,10 +213,29 @@ void control_widget::on_stop_robot_button_clicked()
 
 void control_widget::on_start_robot_button_clicked()
 {
+    // switch to safety handling controllers
+    controller_manager_msgs::SwitchController sc;
+    sc.request.start_controllers = emergency_handling_controllers;
+    sc.request.stop_controllers = regular_controllers;
+    sc.request.strictness = controller_manager_msgs::SwitchController::Request::STRICT;
+    for(auto ns:robot_namespaces)
+        ros::service::call<controller_manager_msgs::SwitchController>(ns + "/" + switch_controller_service,sc);
+    
+    // disable safety, reactivate control
     std_msgs::String msg;
     msg.data = "start";
-    left_arm_stop.publish(msg);
-    right_arm_stop.publish(msg);
+    for(auto& p:stop_publishers)
+        p.publish(msg);
+    
+    std_msgs::Bool eevent_msg;
+    eevent_msg.data = false;
+    for(auto& p:emergency_event_publishers)
+        p.publish(eevent_msg);
+    
+    // switch back to regular controllers
+    std::swap(sc.request.start_controllers, sc.request.stop_controllers);
+    for(auto ns:robot_namespaces)
+        ros::service::call<controller_manager_msgs::SwitchController>(ns + "/" + switch_controller_service,sc);
 }
 void control_widget::on_command_button_clicked(const int& id)
 {

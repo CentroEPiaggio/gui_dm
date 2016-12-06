@@ -40,6 +40,14 @@ private:
   QPushButton quick_button;
   
   ros::Publisher left_arm_stop,right_arm_stop;
+  // namespaces for the various robots
+  std::vector<std::string> robot_namespaces;
+  // safety publishers
+  std::vector<ros::Publisher> stop_publishers;
+  std::vector<ros::Publisher> emergency_event_publishers;
+  // set of controllers to stop/start in case of safety events
+  std::vector<std::string> regular_controllers, emergency_handling_controllers;
+  std::string switch_controller_service;
 
   std::map<int,QPushButton*> map_button;
 
