@@ -1,7 +1,6 @@
 #include "widgets/control_widget.h"
 #include "ros/ros.h"
 #include "ros/package.h"
-#include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
 #include <controller_manager_msgs/SwitchController.h>
 
@@ -61,7 +60,7 @@ control_widget::control_widget(std::vector<std::string> ns_list, message_widget*
     switch_controller_service = "controller_manager/switch_controller";
     for(auto s:robot_namespaces)
     {
-        stop_publishers.emplace_back( n.advertise<std_msgs::String>(s + std::string("/") + stop_str, 10) );
+        stop_publishers.emplace_back( n.advertise<std_msgs::Bool>(s + std::string("/") + stop_str, 10) );
         emergency_event_publishers.emplace_back( n.advertise<std_msgs::Bool>(s + std::string("/") + eevent_str, 10) );
     }
 
@@ -158,8 +157,8 @@ void control_widget::on_stop_robot_button_clicked()
 {
     ROS_DEBUG_STREAM("command STOP to ik_control");
 
-    std_msgs::String msg;
-    msg.data = "stop";
+    std_msgs::Bool msg;
+    msg.data = true;
     for(auto& p:stop_publishers)
         p.publish(msg);
     std_msgs::Bool eevent_msg;
@@ -220,10 +219,11 @@ void control_widget::on_start_robot_button_clicked()
     sc.request.strictness = controller_manager_msgs::SwitchController::Request::STRICT;
     for(auto ns:robot_namespaces)
         ros::service::call<controller_manager_msgs::SwitchController>(ns + "/" + switch_controller_service,sc);
+    usleep(200000);
     
     // disable safety, reactivate control
-    std_msgs::String msg;
-    msg.data = "start";
+    std_msgs::Bool msg;
+    msg.data = false;
     for(auto& p:stop_publishers)
         p.publish(msg);
     
@@ -232,6 +232,7 @@ void control_widget::on_start_robot_button_clicked()
     for(auto& p:emergency_event_publishers)
         p.publish(eevent_msg);
     
+    usleep(200000);
     // switch back to regular controllers
     std::swap(sc.request.start_controllers, sc.request.stop_controllers);
     for(auto ns:robot_namespaces)
