@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 2.8.12)
 project(dual_manipulation_gui)
 
 ENABLE_LANGUAGE(CXX)
@@ -39,23 +39,13 @@ set(WIDGETS_MOC_FILES
     include/widgets/image_widget.h
 )
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+
 find_package(Qt4 COMPONENTS QtCore QtGui QtSvg REQUIRED)
 include(${QT_USE_FILE})
 
 add_definitions(-DQT_NO_KEYWORDS)
-
-qt4_wrap_cpp(GUI_MOC_FILES
-    ${GUI_MOC_FILES}
-)
-qt4_wrap_cpp(VISUALIZATION_GUI_MOC_FILES
-    ${VISUALIZATION_GUI_MOC_FILES}
-)
-qt4_wrap_cpp(STOP_WINDOW_MOC_FILES
-    ${STOP_WINDOW_MOC_FILES}
-)
-qt4_wrap_cpp(WIDGETS_MOC_FILES
-    ${WIDGETS_MOC_FILES}
-)
 
 set(WIDGET_SOURCE_FILES
   src/widgets/render_3d_widget.cpp
