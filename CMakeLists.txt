@@ -14,7 +14,7 @@ else()
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-find_package(catkin REQUIRED COMPONENTS rviz roscpp tf_conversions dual_manipulation_shared)
+find_package(catkin REQUIRED COMPONENTS rviz roscpp tf_conversions dual_manipulation_shared pacman_vision_comm)
 catkin_package()
 include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
@@ -42,8 +42,20 @@ set(WIDGETS_MOC_FILES
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt4 COMPONENTS QtCore QtGui QtSvg REQUIRED)
-include(${QT_USE_FILE})
+if($ENV{ROS_DISTRO} STRLESS "indigo" OR $ENV{ROS_DISTRO} STREQUAL "indigo")
+    find_package(Qt4 COMPONENTS QtCore QtGui QtSvg REQUIRED)
+    include(${QT_USE_FILE})
+elseif($ENV{ROS_DISTRO} STRGREATER "indigo")
+    find_package(Qt5Core)
+    find_package(Qt5Gui)
+    find_package(Qt5Svg)
+    include_directories(${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Svg_INCLUDE_DIRS})
+    set(QT_LIBRARIES
+        ${Qt5Core_LIBRARIES}
+        ${Qt5Gui_LIBRARIES}
+        ${Qt5Svg_LIBRARIES}
+    )
+endif()
 
 add_definitions(-DQT_NO_KEYWORDS)
 
