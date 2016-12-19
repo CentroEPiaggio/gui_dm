@@ -19,32 +19,42 @@ catkin_package()
 include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
+set(GUI_MOC_FILES
+    include/dual_manipulation_gui.h
+)
+set(VISUALIZATION_GUI_MOC_FILES
+    include/dual_manipulation_visualization_gui.h
+)
+set(STOP_WINDOW_MOC_FILES
+    include/stop_window.h
+)
+set(WIDGETS_MOC_FILES
+    include/widgets/render_3d_widget.h
+    include/widgets/camera_widget.h
+    include/widgets/graph_widget.h
+    include/widgets/state_machine_widget.h
+    include/widgets/state_widget.h
+    include/widgets/control_widget.h
+    include/widgets/target_widget.h
+    include/widgets/image_widget.h
+)
+
 find_package(Qt4 COMPONENTS QtCore QtGui QtSvg REQUIRED)
 include(${QT_USE_FILE})
 
 add_definitions(-DQT_NO_KEYWORDS)
 
 qt4_wrap_cpp(GUI_MOC_FILES
-  include/dual_manipulation_gui.h
+    ${GUI_MOC_FILES}
 )
-
 qt4_wrap_cpp(VISUALIZATION_GUI_MOC_FILES
-  include/dual_manipulation_visualization_gui.h
+    ${VISUALIZATION_GUI_MOC_FILES}
 )
-
 qt4_wrap_cpp(STOP_WINDOW_MOC_FILES
-  include/stop_window.h
+    ${STOP_WINDOW_MOC_FILES}
 )
-
 qt4_wrap_cpp(WIDGETS_MOC_FILES
-  include/widgets/render_3d_widget.h
-  include/widgets/camera_widget.h
-  include/widgets/graph_widget.h
-  include/widgets/state_machine_widget.h
-  include/widgets/state_widget.h
-  include/widgets/control_widget.h
-  include/widgets/target_widget.h
-  include/widgets/image_widget.h
+    ${WIDGETS_MOC_FILES}
 )
 
 set(WIDGET_SOURCE_FILES
