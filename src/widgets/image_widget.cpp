@@ -1,12 +1,12 @@
 #include "widgets/image_widget.h"
 #include <dual_manipulation_shared/graph.h>
-#include <QtGui/QPainter>
-#include <QtGui/QApplication>
+#include <QPainter>
+#include <QApplication>
 #include <math.h>
-#include <QtCore/QLocale>
+#include <QLocale>
 #include <QSettings>
-#include <QtGui/QWidget>
-#include <Qt/QtSvg>
+#include <QWidget>
+#include <QtSvg>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -200,7 +200,7 @@ void Viewer::paintEvent ( QPaintEvent *event )
         temp.setPointSize(10);
         item->setFont(temp);
         item->setPos(graph_msg.x[i]*2-9, graph_msg.y[i]*2+10);
-        item->scale(1,-1);
+        item->setTransform(QTransform::fromScale(1,-1),true);
     }
     
     temp.setBrush(QColor("black"));

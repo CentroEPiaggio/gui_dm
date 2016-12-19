@@ -2,7 +2,7 @@
 #include "ros/package.h"
 #include <std_msgs/String.h>
 #include "widgets/image_widget.h"
-#include <QtCore/QSettings>
+#include <QSettings>
 #include <fcntl.h>
 #define STR_DECLARE(x) const std::string x = #x;
 #define MAPPING(x,y,z) type_to_state[x]=y; state_to_visual[y]=z;
@@ -148,7 +148,7 @@ state_machine_widget::state_machine_widget():Viewer()
             e->setZValue(5);
             auto s = Scene->addText(QString::fromStdString(state_to_visual.at(std::get<0>(t))));
             s->setPos(coords+QPointF(50-s->boundingRect().width()/2,25+s->boundingRect().height()/2));
-            s->scale(1,-1);
+            s->setTransform(QTransform::fromScale(1,-1),true);
             s->setFlag(QGraphicsItem::ItemIsSelectable,true);
             s->setFlag(QGraphicsItem::ItemIsMovable,true);
             s->setZValue(10);

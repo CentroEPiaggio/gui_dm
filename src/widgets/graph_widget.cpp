@@ -1,7 +1,7 @@
 #include "widgets/graph_widget.h"
 #include "ros/package.h"
 #include <widgets/state_machine_widget.h>
-#include <Qt/QtSvg>
+#include <QtSvg>
 graph_widget::graph_widget()
 {
     std::string path=ros::package::getPath("dual_manipulation_planner");

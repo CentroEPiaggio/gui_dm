@@ -1,8 +1,8 @@
 #ifndef VIEWER
 #define VIEWER
 
-#include <QtGui/QWidget>
-#include <QtGui/QKeyEvent>
+#include <QWidget>
+#include <QKeyEvent>
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
