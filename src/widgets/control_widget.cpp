@@ -219,7 +219,7 @@ void control_widget::on_start_robot_button_clicked()
     sc.request.strictness = controller_manager_msgs::SwitchController::Request::STRICT;
     for(auto ns:robot_namespaces)
         ros::service::call<controller_manager_msgs::SwitchController>(ns + "/" + switch_controller_service,sc);
-    usleep(200000);
+//     usleep(200000);
     
     // disable safety, reactivate control
     std_msgs::Bool msg;
@@ -232,7 +232,7 @@ void control_widget::on_start_robot_button_clicked()
     for(auto& p:emergency_event_publishers)
         p.publish(eevent_msg);
     
-    usleep(200000);
+//     usleep(200000);
     // switch back to regular controllers
     std::swap(sc.request.start_controllers, sc.request.stop_controllers);
     for(auto ns:robot_namespaces)

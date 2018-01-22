@@ -184,29 +184,31 @@ target_widget::target_widget(bool setting_source_position_, std::vector< std::st
     pub_target = n.advertise<visualization_msgs::Marker>( "/objects_marker", 1000 );
     im_sub_fb = n.subscribe("/objects_interactive_marker/feedback",1,&target_widget::im_callback,this);
 
-    source_marker.color.a=1;
-    source_marker.color.r=0;
-    source_marker.color.g=0;
-    source_marker.color.b=1;
+    
     source_marker.header.frame_id = "/world";
     source_marker.id=1;
     source_marker.ns="source";
     source_marker.lifetime = ros::DURATION_MAX;
     source_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
+    source_marker.color.a=1.0;
+    source_marker.color.r=0.0f;
+    source_marker.color.g=0.0f;
+    source_marker.color.b=1.0f;
     source_marker.scale.x = 1;
     source_marker.scale.y = 1;
     source_marker.scale.z = 1;
     source_marker.pose.orientation.w=1;
 
-    target_marker.color.a=1;
-    target_marker.color.r=1;
-    target_marker.color.g=0;
-    target_marker.color.b=0;
+    
     target_marker.header.frame_id = "/world";
     target_marker.id=1;
     target_marker.ns="target";
     target_marker.lifetime = ros::DURATION_MAX;
     target_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
+    target_marker.color.a=1.0;
+    target_marker.color.r=1.0f;
+    target_marker.color.g=0.0f;
+    target_marker.color.b=0.0f;
     target_marker.scale.x = 1;
     target_marker.scale.y = 1;
     target_marker.scale.z = 1;
