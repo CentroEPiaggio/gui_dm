@@ -49,11 +49,13 @@ elseif($ENV{ROS_DISTRO} STRGREATER "indigo")
     find_package(Qt5Core)
     find_package(Qt5Gui)
     find_package(Qt5Svg)
-    include_directories(${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Svg_INCLUDE_DIRS})
+    find_package(Qt5Widgets)
+    include_directories(${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Svg_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS})
     set(QT_LIBRARIES
         ${Qt5Core_LIBRARIES}
         ${Qt5Gui_LIBRARIES}
         ${Qt5Svg_LIBRARIES}
+        ${Qt5Widgets_LIBRARIES}
     )
 endif()
 
